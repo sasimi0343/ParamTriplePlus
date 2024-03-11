@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Update="ColorTrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="CustomizedTrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="FontTrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="MainWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ParamBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="PathTrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="PortableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="SimpleParamBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="TransionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Vector3TrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+  </ItemGroup>
+</Project>
