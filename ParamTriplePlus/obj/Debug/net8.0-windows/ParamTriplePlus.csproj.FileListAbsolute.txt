@@ -24,3 +24,7 @@ E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePl
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.PathTrackBar.resources
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.Properties.Resources.resources
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.PortableDialog.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.sourcelink.json
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.Vector2TrackBar.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.ConditionBar.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.ConditionWindow.resources

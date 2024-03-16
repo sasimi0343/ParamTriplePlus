@@ -35,6 +35,7 @@
             transion_string = new ContextMenuStrip(components);
             transion_any = new ContextMenuStrip(components);
             trackBar1 = new TrackBar();
+            button1 = new Button();
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
             SuspendLayout();
             // 
@@ -43,13 +44,13 @@
             panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel1.Location = new Point(208, 3);
             panel1.Name = "panel1";
-            panel1.Size = new Size(484, 26);
+            panel1.Size = new Size(443, 26);
             panel1.TabIndex = 3;
             // 
             // transionButton
             // 
             transionButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            transionButton.Location = new Point(698, 3);
+            transionButton.Location = new Point(657, 3);
             transionButton.Name = "transionButton";
             transionButton.Size = new Size(74, 23);
             transionButton.TabIndex = 2;
@@ -76,18 +77,30 @@
             // 
             trackBar1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             trackBar1.AutoSize = false;
-            trackBar1.Location = new Point(0, 0);
+            trackBar1.Location = new Point(3, 0);
             trackBar1.Name = "trackBar1";
-            trackBar1.Size = new Size(202, 32);
+            trackBar1.Size = new Size(199, 32);
             trackBar1.TabIndex = 4;
             trackBar1.ValueChanged += trackBar1_ValueChanged;
             trackBar1.MouseDown += trackBar1_MouseDown;
             trackBar1.MouseUp += trackBar1_MouseUp;
             // 
+            // button1
+            // 
+            button1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            button1.Location = new Point(732, 3);
+            button1.Name = "button1";
+            button1.Size = new Size(40, 23);
+            button1.TabIndex = 0;
+            button1.Text = "削除";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
+            // 
             // SimpleParamBar
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(button1);
             Controls.Add(trackBar1);
             Controls.Add(transionButton);
             Controls.Add(panel1);
@@ -104,5 +117,6 @@
         private ContextMenuStrip transion_string;
         private ContextMenuStrip transion_any;
         public TrackBar trackBar1;
+        private Button button1;
     }
 }

@@ -153,6 +153,9 @@ namespace ParamTriplePlus
         public delegate void FrameChangedEvent(int frame);
         public event FrameChangedEvent OnFrameChanged;
 
+        public delegate void DeletedEvent();
+        public event DeletedEvent OnDeleted;
+
         private void transionButton_Click(object sender, EventArgs e)
         {
             if (
@@ -174,7 +177,7 @@ namespace ParamTriplePlus
             }
         }
 
-        public void RemoveFrameEvent() { OnFrameChanged = null; }
+        public void RemoveFrameEvent() { OnFrameChanged = null; OnDeleted = null; }
 
         private bool MouseClicked = false;
         public bool IgnoreFrameEvent { get; set; }
@@ -193,6 +196,11 @@ namespace ParamTriplePlus
         private void trackBar1_MouseDown(object sender, MouseEventArgs e)
         {
             MouseClicked = true;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (OnDeleted != null) OnDeleted.Invoke();
         }
     }
 }

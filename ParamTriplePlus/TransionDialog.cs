@@ -54,6 +54,7 @@ namespace ParamTriplePlus
                 parambar.trackBar1.Maximum = length;
                 parambar.trackBar1.Value = ParamList.GetField<int>(item, "frame");
                 parambar.OnFrameChanged += (a) => { ParamList.SetField(list[parambar.index], "frame", a); UpdateOnly(); };
+                parambar.OnDeleted += () => { RemoveSection(parambar.index); };
                 parambar.Parent = listpanel;
                 parambar.Width = listpanel.Width;
                 parambar.Location = new Point(3, height);
@@ -64,6 +65,13 @@ namespace ParamTriplePlus
                 height += parambar.Height;
                 i++;
             }
+        }
+
+        public void RemoveSection(int section)
+        {
+            var transionlist = transion.GetType().GetField("sections").GetValue(transion);
+            transionlist.GetType().GetMethod("RemoveAt").Invoke(transionlist, new object[] { section });
+            UpdateOnly();
         }
 
         public void UpdateOnly()
@@ -105,6 +113,7 @@ namespace ParamTriplePlus
                     parambar.trackBar1.Value = ParamList.GetField<int>(item, "frame");
                     parambar.IgnoreFrameEvent = false;
                     parambar.OnFrameChanged += (a) => { ParamList.SetField(list[parambar.index], "frame", a); UpdateOnly(); };
+                    parambar.OnDeleted += () => { RemoveSection(parambar.index); };
                     parambar.Parent = listpanel;
                     mainwindow.AddTransionParam(parambar, param, i);
                 }
@@ -114,6 +123,7 @@ namespace ParamTriplePlus
                     parambar.trackBar1.Maximum = length;
                     parambar.trackBar1.Value = ParamList.GetField<int>(item, "frame");
                     parambar.OnFrameChanged += (a) => { ParamList.SetField(list[parambar.index], "frame", a); UpdateOnly(); };
+                    parambar.OnDeleted += () => { RemoveSection(parambar.index); };
                     parambar.Parent = listpanel;
                     mainwindow.AddTransionParam(parambar, param, i);
                 }

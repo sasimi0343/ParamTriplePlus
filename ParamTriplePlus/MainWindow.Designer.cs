@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            TreeNode treeNode1 = new TreeNode("Draw");
+            TreeNode treeNode2 = new TreeNode("Draw");
             menuStrip1 = new MenuStrip();
             Menu_Files = new ToolStripMenuItem();
             Files_NewObjectFile = new ToolStripMenuItem();
@@ -61,6 +61,8 @@
             toolStripSeparator2 = new ToolStripSeparator();
             上に移動ToolStripMenuItem = new ToolStripMenuItem();
             下に移動ToolStripMenuItem = new ToolStripMenuItem();
+            effectMenu = new ContextMenuStrip(components);
+            toolStripMenuItem1 = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             tabControl1.SuspendLayout();
             mainTab.SuspendLayout();
@@ -155,9 +157,9 @@
             treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             treeView1.Location = new Point(3, 6);
             treeView1.Name = "treeView1";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Draw";
-            treeView1.Nodes.AddRange(new TreeNode[] { treeNode1 });
+            treeNode2.Name = "Root";
+            treeNode2.Text = "Draw";
+            treeView1.Nodes.AddRange(new TreeNode[] { treeNode2 });
             treeView1.Size = new Size(603, 384);
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
@@ -219,76 +221,89 @@
             // 
             nodeTreeContext.Items.AddRange(new ToolStripItem[] { コピーToolStripMenuItem, 切り取りToolStripMenuItem, 貼りつけToolStripMenuItem, ndc_remove, 名前の変更ToolStripMenuItem, toolStripSeparator1, グループに移動ToolStripMenuItem, 上に移動ToolStripMenuItem, 下に移動ToolStripMenuItem });
             nodeTreeContext.Name = "nodeTreeContext";
-            nodeTreeContext.Size = new Size(144, 186);
+            nodeTreeContext.Size = new Size(181, 208);
             // 
             // コピーToolStripMenuItem
             // 
             コピーToolStripMenuItem.Name = "コピーToolStripMenuItem";
-            コピーToolStripMenuItem.Size = new Size(143, 22);
+            コピーToolStripMenuItem.Size = new Size(180, 22);
             コピーToolStripMenuItem.Text = "コピー";
             // 
             // 切り取りToolStripMenuItem
             // 
             切り取りToolStripMenuItem.Name = "切り取りToolStripMenuItem";
-            切り取りToolStripMenuItem.Size = new Size(143, 22);
+            切り取りToolStripMenuItem.Size = new Size(180, 22);
             切り取りToolStripMenuItem.Text = "切り取り";
             // 
             // 貼りつけToolStripMenuItem
             // 
             貼りつけToolStripMenuItem.Name = "貼りつけToolStripMenuItem";
-            貼りつけToolStripMenuItem.Size = new Size(143, 22);
+            貼りつけToolStripMenuItem.Size = new Size(180, 22);
             貼りつけToolStripMenuItem.Text = "貼りつけ";
             // 
             // ndc_remove
             // 
             ndc_remove.Name = "ndc_remove";
-            ndc_remove.Size = new Size(143, 22);
+            ndc_remove.Size = new Size(180, 22);
             ndc_remove.Text = "削除";
             ndc_remove.Click += ndc_remove_Click;
             // 
             // 名前の変更ToolStripMenuItem
             // 
             名前の変更ToolStripMenuItem.Name = "名前の変更ToolStripMenuItem";
-            名前の変更ToolStripMenuItem.Size = new Size(143, 22);
+            名前の変更ToolStripMenuItem.Size = new Size(180, 22);
             名前の変更ToolStripMenuItem.Text = "名前の変更";
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(140, 6);
+            toolStripSeparator1.Size = new Size(177, 6);
             // 
             // グループに移動ToolStripMenuItem
             // 
-            グループに移動ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 新規グループToolStripMenuItem, toolStripSeparator2 });
+            グループに移動ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 新規グループToolStripMenuItem, toolStripSeparator2, toolStripMenuItem1 });
             グループに移動ToolStripMenuItem.Name = "グループに移動ToolStripMenuItem";
-            グループに移動ToolStripMenuItem.Size = new Size(143, 22);
+            グループに移動ToolStripMenuItem.Size = new Size(180, 22);
             グループに移動ToolStripMenuItem.Text = "グループに移動";
             // 
             // 新規グループToolStripMenuItem
             // 
             新規グループToolStripMenuItem.Name = "新規グループToolStripMenuItem";
-            新規グループToolStripMenuItem.Size = new Size(134, 22);
+            新規グループToolStripMenuItem.Size = new Size(180, 22);
             新規グループToolStripMenuItem.Text = "新規グループ";
             新規グループToolStripMenuItem.Click += 新規グループToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(131, 6);
+            toolStripSeparator2.Size = new Size(177, 6);
             // 
             // 上に移動ToolStripMenuItem
             // 
             上に移動ToolStripMenuItem.Name = "上に移動ToolStripMenuItem";
-            上に移動ToolStripMenuItem.Size = new Size(143, 22);
+            上に移動ToolStripMenuItem.Size = new Size(180, 22);
             上に移動ToolStripMenuItem.Text = "上に移動";
             上に移動ToolStripMenuItem.Click += 上に移動ToolStripMenuItem_Click;
             // 
             // 下に移動ToolStripMenuItem
             // 
             下に移動ToolStripMenuItem.Name = "下に移動ToolStripMenuItem";
-            下に移動ToolStripMenuItem.Size = new Size(143, 22);
+            下に移動ToolStripMenuItem.Size = new Size(180, 22);
             下に移動ToolStripMenuItem.Text = "下に移動";
             下に移動ToolStripMenuItem.Click += 下に移動ToolStripMenuItem_Click;
+            // 
+            // effectMenu
+            // 
+            effectMenu.Name = "effectMenu";
+            effectMenu.Size = new Size(61, 4);
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Enabled = false;
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(180, 22);
+            toolStripMenuItem1.Text = "ルート";
+            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // MainWindow
             // 
@@ -345,5 +360,7 @@
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem 上に移動ToolStripMenuItem;
         private ToolStripMenuItem 下に移動ToolStripMenuItem;
+        private ContextMenuStrip effectMenu;
+        private ToolStripMenuItem toolStripMenuItem1;
     }
 }

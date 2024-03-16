@@ -1,9 +1,9 @@
 using ParamTriplePlus.Params;
 using ParamTriplePlus.Params.AviUtl;
+using ParamTriplePlus.Params.NotAviUtl;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
 
 namespace ParamTriplePlus
 {
@@ -14,12 +14,56 @@ namespace ParamTriplePlus
             InitializeComponent();
             CommandLineArgs = args;
 
+            treeView1.ExpandAll();
+
+            InitializeAllEffects();
+
             if (args.Length > 0)
             {
                 CurrentPath = args[0];
-                File.WriteAllText(Path.Combine(Application.StartupPath, "running"), CurrentPath);
+                File.WriteAllText(System.IO.Path.Combine(Application.StartupPath, "running"), CurrentPath);
                 Open();
             }
+        }
+
+        private ContextMenuStrip effectMenu_short;
+
+        private void InitializeAllEffects()
+        {
+            effectMenu_short = new ContextMenuStrip();
+            var blur = AddEffectTree("装飾");
+            AddEffectTree(typeof(EFBorder), blur);
+            AddEffectTree(typeof(EFShadow), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFFlatShadow), blur);
+            AddEffectTree(typeof(EFInnerShadow), blur);
+            AddEffectTree(typeof(EFOutline), blur);
+            AddEffectTree(typeof(EFWorm), blur);
+            blur = AddEffectTree("ぼかし+ブラー");
+            AddEffectTree(typeof(EFBlur), blur);
+            AddEffectTree(typeof(EFBorderBlur), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFLineBlur), blur);
+            AddEffectTree(typeof(EFRadioBlur), blur);
+            blur = AddEffectTree("切り抜き");
+            AddEffectTree(typeof(EFClipping), blur);
+            AddEffectTree(typeof(EFTendClipping), blur);
+            AddEffectTree(typeof(EFMask), blur);
+            blur = AddEffectTree("色変更");
+            AddEffectTree(typeof(EFAdjustColor), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFColorlize), blur);
+            AddEffectTree(typeof(EFGradient), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFNoise), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFChromaKey), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFAlphaContrast), blur);
+            blur = AddEffectTree("変形");
+            AddEffectTree(typeof(EFRaster), blur);
+            AddEffectTree(typeof(EFPolarCoordinateTransform), blur);
+            AddEffectTree(typeof(EFDisplacementMap), blur);
         }
 
         public void UpdateTitle()
@@ -54,6 +98,7 @@ namespace ParamTriplePlus
                     UpdateTree(node, group.children);
                 }
             }
+            //treeView1.ExpandAll();
         }
 
         public void Sort()
@@ -91,6 +136,40 @@ namespace ParamTriplePlus
             return tab;
         }
 
+        private void AddEffectTree(ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? effectMenu.Items : parent.DropDownItems;
+            itemlist.Add(new ToolStripSeparator());
+        }
+
+        private void AddEffectTree(Type type, ToolStripMenuItem parent = null)
+        {
+            var a = (AviutlEffect)type.GetConstructors()[0].Invoke(new object[] { });
+            AddEffectTree(type, a.Name, parent);
+        }
+
+        private ToolStripMenuItem AddEffectTree(string name, ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? effectMenu.Items : parent.DropDownItems;
+            effectMenu_short.Items.Add(new ToolStripSeparator());
+            return (ToolStripMenuItem)itemlist.Add(name);
+        }
+
+        private void AddEffectTree(Type type, string name, ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? effectMenu.Items : parent.DropDownItems;
+            var eff = (ToolStripMenuItem)itemlist.Add(name);
+            var eff2 = (ToolStripMenuItem)effectMenu_short.Items.Add(name);
+            eff.Click += (_, _) =>
+            {
+                AddEffect(tabList[tabControl1.SelectedTab], (AviutlEffect)type.GetConstructors()[0].Invoke(new object[] { }));
+            };
+            eff2.Click += (_, _) =>
+            {
+                AddEffect(tabList[tabControl1.SelectedTab], (AviutlEffect)type.GetConstructors()[0].Invoke(new object[] { }));
+            };
+        }
+
         public void AddObject(AviutlMediaObject obj)
         {
             obj.index = objects.Count;
@@ -99,11 +178,39 @@ namespace ParamTriplePlus
             var tab = AddTab("[" + obj.index + "]" + obj.Name);
             tabList.Add(tab, obj);
 
-            tab.AutoScroll = true;
-
             foreach (var item in obj.GetParams())
             {
                 AddTrack(tab, item, obj);
+            }
+
+            var height = CalcHeight(tab);
+            var btn = new Button();
+            btn.Text = "エフェクトを追加";
+            btn.Parent = tab;
+            btn.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+            btn.Location = new Point(3, height);
+            btn.Width = tab.Width - 6;
+            /*btn.Click += (_, _) =>
+            {
+                effectMenu.Show(btn.Parent, btn.Location);
+            };*/
+            btn.MouseDown += (_, e) =>
+            {
+                if (e.Button == MouseButtons.Right)
+                {
+                    effectMenu_short.Show(btn.Parent, btn.Location.X + e.X, btn.Location.Y + e.Y);
+                }
+                else
+                {
+                    effectMenu.Show(btn.Parent, btn.Location.X + e.X, btn.Location.Y + e.Y);
+                }
+            };
+
+            tab.AutoScroll = true;
+
+            foreach (var item in obj.effects)
+            {
+                AddEffect(obj, item, true);
             }
 
             if (obj is GroupObject)
@@ -120,6 +227,63 @@ namespace ParamTriplePlus
 
             UpdateTree();
 
+        }
+
+        public void AddEffect(AviutlMediaObject obj, AviutlEffect eff, bool onlyDisplay = false)
+        {
+            var tab = GetTab(obj);
+            if (tab == null) return;
+            var scrollvalue = tab.VerticalScroll.Value;
+            tab.AutoScroll = false;
+            var cont = new GroupBox();
+            cont.Parent = tab;
+            cont.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
+            cont.Width = tab.Width - 6;
+            cont.Text = eff.Name;
+            eff.groupbox = cont;
+            eff.parent = obj;
+
+            var btn = new Button();
+            btn.Text = "削除";
+            btn.Parent = cont;
+            btn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btn.AutoSize = true;
+            btn.Location = new Point(cont.Width - btn.Width - 3, 3);
+            btn.Click += (_, _) =>
+            {
+                RemoveEffect(eff);
+            };
+
+            var btn2 = new Button();
+            btn2.Text = "条件...";
+            btn2.Parent = cont;
+            btn2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btn2.AutoSize = true;
+            btn2.Location = new Point(cont.Width - btn.Width - btn2.Width - 6, 3);
+            btn2.Click += (_, _) =>
+            {
+                var condwindow = new ConditionWindow(this, eff.condition);
+                condwindow.ShowDialog();
+            };
+
+            foreach (var item in eff.GetParams())
+            {
+                AddTrack(cont, item, obj);
+            }
+
+            var height = CalcHeight(cont) + 6;
+
+            cont.Height = height;
+
+            height = CalcHeightStrictly(tab) + 9;
+
+            cont.Location = new Point(3, height);
+
+            tab.AutoScroll = true;
+
+            tab.VerticalScroll.Value = scrollvalue;
+
+            if (!onlyDisplay) obj.effects.Add(eff);
         }
 
         public void AddTransionParam(SimpleParamBar parambar, object param, int index)
@@ -292,6 +456,18 @@ namespace ParamTriplePlus
                 case ParamType.Text:
                     break;
                 case ParamType.Vector2:
+                    var vec2param = (Param<Vector2>)param;
+                    var vec2num = parambar.panelControl != null ? (Vector2TrackBar)parambar.panelControl : new Vector2TrackBar();
+                    vec2num.Value = vec2param.Value.sections[index].value;
+                    if (isnew) vec2num.OnValueChanged += (a) =>
+                    {
+                        vec2param.Value.sections[parambar.index].value = a;
+
+                    };
+
+                    if (isnew) parambar.Height = vec2num.Height;
+
+                    parambar.SetPanel(vec2num);
                     break;
                 case ParamType.Vector3:
                     var vec3param = (Param<Vector3>)param;
@@ -317,27 +493,29 @@ namespace ParamTriplePlus
             }
         }
 
-        public void AddTrack(Panel tab, object param, AviutlMediaObject mediaobject)
+        private int CalcHeight(Control tab)
         {
             var height = 3;
             foreach (var item in tab.Controls)
             {
                 height += ((Control)item).Height;
             }
-            var track = new ParamBar();
-            track.Label = ParamList.GetField<string>(param, "label");
-            track.Parent = tab;
-            track.Location = new Point(3, height);
-            track.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-            track.Width = tab.Width - 6;
-            track.param = param;
-            track.OnTransionButtonClicked += () =>
-            {
-                var tra = new TransionDialog(this, ParamList.GetProperty<object>(param, "Value"), param, mediaobject.length.Value.initialValue);
-                tra.ShowDialog();
-            };
-            track.DisableTransion = ParamList.GetField<bool>(param, "DisableTransion");
+            return height;
+        }
 
+        public int CalcHeightStrictly(Panel tab)
+        {
+            var height = 0;
+            foreach (var item in tab.Controls)
+            {
+                var cont = (Control)item;
+                height = Math.Max(cont.Height + cont.Location.Y, height);
+            }
+            return height;
+        }
+
+        public Control CreateParamUI(object param)
+        {
             var paramtype = ParamList.GetField<ParamType>(param, "paramtype");
             switch (paramtype)
             {
@@ -352,8 +530,7 @@ namespace ParamTriplePlus
                         numparam.Value.initialValue = (int)num.Value;
                     };
 
-                    track.SetPanel(num);
-                    break;
+                    return num;
                 case ParamType.Float:
                     var floatparam = (Param<float>)param;
                     var floatnum = new CustomizedTrackBar();
@@ -366,8 +543,7 @@ namespace ParamTriplePlus
                         floatparam.Value.initialValue = a;
                     };
 
-                    track.SetPanel(floatnum);
-                    break;
+                    return floatnum;
                 case ParamType.Int:
                     var intparam = (Param<int>)param;
                     var intnum = new CustomizedTrackBar();
@@ -380,8 +556,7 @@ namespace ParamTriplePlus
                         intparam.Value.initialValue = (int)a;
                     };
 
-                    track.SetPanel(intnum);
-                    break;
+                    return intnum;
                 case ParamType.String:
                     var strparam = (Param<string>)param;
                     var strText = new TextBox();
@@ -391,8 +566,7 @@ namespace ParamTriplePlus
                         strparam.Value.initialValue = strText.Text;
                     };
 
-                    track.SetPanel(strText);
-                    break;
+                    return strText;
                 case ParamType.File:
                     var fileparam = (Param<string>)param;
                     var fileText = new PathTrackBar(this);
@@ -403,9 +577,7 @@ namespace ParamTriplePlus
                         fileparam.Value.initialValue = fileText.PathText;
                     };
 
-                    track.Height = fileText.Height;
-                    track.SetPanel(fileText);
-                    break;
+                    return fileText;
                 case ParamType.Folder:
                     var folderparam = (Param<string>)param;
                     var folderText = new PathTrackBar(this);
@@ -416,9 +588,7 @@ namespace ParamTriplePlus
                         folderparam.Value.initialValue = folderText.PathText;
                     };
 
-                    track.Height = folderText.Height;
-                    track.SetPanel(folderText);
-                    break;
+                    return folderText;
                 case ParamType.MultiLine:
                     var mlstrparam = (Param<string>)param;
                     var mlstrText = new TextBox();
@@ -431,10 +601,7 @@ namespace ParamTriplePlus
 
                     mlstrText.Height = 96;
 
-                    track.Height = mlstrText.Height;
-
-                    track.SetPanel(mlstrText);
-                    break;
+                    return mlstrText;
                 case ParamType.Font:
                     var fontparam = (Param<string>)param;
                     var fontText = new FontTrackBar();
@@ -444,8 +611,7 @@ namespace ParamTriplePlus
                         fontparam.Value.initialValue = fontText.FontName;
                     };
 
-                    track.SetPanel(fontText);
-                    break;
+                    return fontText;
                 case ParamType.Color:
                     var colorparam = (Param<Params.Color>)param;
                     var colorTrack = new ColorTrackBar();
@@ -455,8 +621,7 @@ namespace ParamTriplePlus
                         colorparam.Value.initialValue = colorTrack.selectedColor;
                     };
 
-                    track.SetPanel(colorTrack);
-                    break;
+                    return colorTrack;
                 case ParamType.Point:
                     break;
                 case ParamType.List:
@@ -479,8 +644,7 @@ namespace ParamTriplePlus
                         ParamList.SetValue(param, comboBox.SelectedIndex);
                     };
 
-                    track.SetPanel(comboBox);
-                    break;
+                    return comboBox;
                 case ParamType.Boolean:
                     var boolparam = (Param<bool>)param;
                     var boolText = new CheckBox();
@@ -491,12 +655,19 @@ namespace ParamTriplePlus
                         boolparam.Value.initialValue = boolText.Checked;
                     };
 
-                    track.SetPanel(boolText);
-                    break;
+                    return boolText;
                 case ParamType.Text:
                     break;
                 case ParamType.Vector2:
-                    break;
+                    var vec2param = (Param<Vector2>)param;
+                    var vec2num = new Vector2TrackBar();
+                    vec2num.Value = vec2param.Value.initialValue;
+                    vec2num.OnValueChanged += (a) =>
+                    {
+                        ParamList.SetValue(param, a);
+                    };
+
+                    return vec2num;
                 case ParamType.Vector3:
                     var vec3param = (Param<Vector3>)param;
                     var vec3num = new Vector3TrackBar();
@@ -506,10 +677,7 @@ namespace ParamTriplePlus
                         ParamList.SetValue(param, a);
                     };
 
-                    track.Height = vec3num.Height;
-
-                    track.SetPanel(vec3num);
-                    break;
+                    return vec3num;
                 case ParamType.Dialog:
                     break;
                 case ParamType.Button:
@@ -518,6 +686,33 @@ namespace ParamTriplePlus
                 default:
                     break;
             }
+            return null;
+        }
+
+        public void AddTrack(Control tab, object param, AviutlMediaObject mediaobject)
+        {
+            var height = 3;
+            foreach (var item in tab.Controls)
+            {
+                height += ((Control)item).Height;
+            }
+            var track = new ParamBar();
+            track.Label = ParamList.GetField<string>(param, "label");
+            track.Parent = tab;
+            track.Location = new Point(3, height);
+            track.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+            track.Width = tab.Width - 6;
+            track.param = param;
+            track.OnTransionButtonClicked += () =>
+            {
+                var tra = new TransionDialog(this, ParamList.GetProperty<object>(param, "Value"), param, mediaobject.length.Value.initialValue);
+                tra.ShowDialog();
+            };
+            track.DisableTransion = ParamList.GetField<bool>(param, "DisableTransion");
+
+            var panel = CreateParamUI(param);
+            track.Height = panel.Height;
+            track.SetPanel(panel);
         }
 
         private void AddObjectButton_Click(object sender, EventArgs e)
@@ -678,6 +873,29 @@ namespace ParamTriplePlus
             UpdateTree();
         }
 
+        public void RemoveEffect(AviutlEffect eff)
+        {
+            if (eff == null) return;
+            var obj = eff.parent;
+            if (obj == null) return;
+            obj.effects.Remove(eff);
+            eff.groupbox.Parent = null;
+            eff.groupbox.Dispose();
+
+            foreach (var item in obj.effects)
+            {
+                item.groupbox.Parent = null;
+            }
+
+            var tab = GetTab(obj);
+            foreach (var item in obj.effects)
+            {
+                var height = CalcHeightStrictly(tab) + 9;
+                item.groupbox.Parent = tab;
+                item.groupbox.Location = new Point(3, height);
+            }
+        }
+
         private void 画像ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AddObject(new ImageObject());
@@ -728,6 +946,7 @@ namespace ParamTriplePlus
                 var toolitem = groupmenuItems[(GroupObject)obj];
                 toolitem.Enabled = false;
             }
+            toolStripMenuItem1.Enabled = obj.Parent != null;
         }
 
         private void 上に移動ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -749,13 +968,20 @@ namespace ParamTriplePlus
             var node = treeView1.SelectedNode;
             if (node == null) return;
             if (!nodeList.TryGetValue(node, out var obj)) return;
-            if (obj.index >= obj.ParentList.Count-1) return;
+            if (obj.index >= obj.ParentList.Count - 1) return;
             var target = obj.ParentList[obj.index + 1];
             target.index--;
             obj.index++;
             UpdateTree();
             GetTab(target).Text = "[" + target.index + "]" + target.Name;
             GetTab(obj).Text = "[" + obj.index + "]" + obj.Name;
+        }
+
+        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            var node = treeView1.SelectedNode;
+            if (node == null) return;
+            ChangeParent(node, null);
         }
     }
 }

@@ -1,0 +1,380 @@
+@[PTP] Test
+--dialog:FilePath,file="";
+--check0:DontCheckRunning
+
+if (rikky_module == nil) then
+require("rikky_module")
+end
+
+if (paramtripleplus == nil) then
+paramtripleplus = {}
+end
+
+local frame = rikky_module.getinfo("frame")
+local this = obj.layer .. "_" .. (frame - obj.frame) .. "_" .. obj.index
+
+local checkrunning = (not obj.check0) and (rikky_module.getinfo("state") == "editing")
+
+local path = rikky_module.getinfo("aup")
+if (path == "") then
+	path = rikky_module.getinfo("path")
+else
+	path = string.sub(path, 1, -#(rikky_module.getinfo("aup", 1))-5)
+end
+
+local notexist = true
+local folderpath = path .. "_ptp";
+folders = rikky_module.dir(path, "")
+for k,v in pairs(folders) do
+	if (v == folderpath) then
+		notexist = false
+		break
+	end
+end
+
+if (notexist) then os.execute("mkdir \"" .. folderpath .. "\"") end
+folders = rikky_module.dir(folderpath, ".aulptp")
+
+if (file == "") then
+	file = "" .. #folders
+	rikky_module.setdialogparamCS("file", file)
+end
+
+local fullpath = folderpath .. "\\" .. file .. ".aulptp"
+
+if (checkrunning and rikky_module.getinfo("focus")) then
+	
+	local executable = false
+	local checkpath = obj.getinfo("script_path") .. "PTP\\running";
+	local fh = io.open(checkpath)
+	
+	if (fh == nil) then
+		executable = true
+	else
+		local pat = fh:read("*a")
+		fh:close()
+		
+		if (pat == fullpath) then
+			executable = false
+		else
+			executable = true
+		end
+	end
+	
+	if (executable) then os.execute("start \"PTP\" " .. obj.getinfo("script_path") .. "PTP\\ParamTriplePlus.exe \"" .. fullpath .. "\"") end
+	
+end
+
+if (obj.frame == 0 or checkrunning or (not paramtripleplus[this] == nil)) then
+	local ptp = {}
+	local fh, err = io.open(fullpath)
+	local str = rikky_module.convert(rikky_module.convert(fh:read("*a"), "shift-jis"), "utf8")
+	function toobj(st)
+		if ((string.sub(st, 1, 1) == "\"") and (string.sub(st, -1, -1) == "\"")) then
+			return string.sub(st, 2, -2)
+		end
+		local num = tonumber(st)
+		if (not (num == nil)) then return num end
+		if (string.lower(st) == "true") then return true end
+		if (string.lower(st) == "false") then return false end
+		if (string.lower(st) == "null") then return nil end
+		if ((string.sub(st, 1, 1) == "[") and (string.sub(st, -1, -1) == "]")) then
+			local kansei = {}
+			local itizi = ""
+			local iskakko = false
+			local prev = ""
+			local level = 0
+			for i=2,#st-1 do
+				local c = string.sub(st, i, i)
+				
+				if ((not iskakko) and (c == "\"")) then
+					iskakko = true
+					itizi = itizi .. c
+				elseif ((iskakko) and (c == "\"") and (not (prev == "\\"))) then
+					iskakko = false
+					itizi = itizi .. c
+				elseif ((not iskakko) and ((c == "{") or (c == "["))) then
+					level = level + 1
+					itizi = itizi .. c
+				elseif ((not iskakko) and ((c == "}") or (c == "]"))) then
+					level = level - 1
+					itizi = itizi .. c
+				elseif ((not iskakko) and (c == ",") and (level == 0)) then
+					table.insert(kansei, toobj(itizi))
+					itizi = ""
+				else
+					itizi = itizi .. c
+				end
+				
+				prev = c
+			end
+			
+			if (not (itizi == "")) then table.insert(kansei, toobj(itizi)) end
+			
+			return kansei
+		end
+		return perse(st)
+	end
+	function perse(st)
+		local kansei = {}
+		local itizi = ""
+		local itizi2 = ""
+		local isvalue = false
+		local iskakko = false
+		local prev = ""
+		local level = 0
+		for i=2,#st-1 do
+			local c = string.sub(st, i, i)
+			
+			if ((not isvalue) and (not iskakko) and (c == ":")) then
+				isvalue = true
+				itizi2 = string.sub(itizi, 2, -2)
+				itizi = ""
+			elseif ((not iskakko) and (c == "\"")) then
+				iskakko = true
+				itizi = itizi .. c
+			elseif ((iskakko) and (c == "\"") and (not (prev == "\\"))) then
+				iskakko = false
+				itizi = itizi .. c
+			elseif (isvalue and (not iskakko) and ((c == "{") or (c == "["))) then
+				level = level + 1
+				itizi = itizi .. c
+			elseif (isvalue and (not iskakko) and ((c == "}") or (c == "]"))) then
+				level = level - 1
+				itizi = itizi .. c
+			elseif (isvalue and (not iskakko) and (c == ",") and (level == 0)) then
+				isvalue = false
+				if (itizi2 == "") then
+					table.insert(kansei, toobj(itizi))
+				else
+					kansei[itizi2] = toobj(itizi)
+				end
+				
+				itizi = ""
+				itizi2 = ""
+			else
+				itizi = itizi .. c
+			end
+			
+			prev = c
+		end
+		
+		if (not (itizi == "")) then
+			if (itizi2 == "") then
+				table.insert(kansei, toobj(itizi))
+			else
+				kansei[itizi2] = toobj(itizi)
+			end
+		end
+		
+		return kansei
+	end
+	
+	function printTable(tab, indent)
+		if (indent == nil) then indent = 0 end
+		if (type(tab) == "table") then
+			local kansei = "{\n"
+			for k,v in pairs(tab) do
+				kansei = kansei .. string.rep("	", indent) .. k .. " = " .. printTable(v, indent + 1) .. "\n"
+			end
+			kansei = kansei .. string.rep("	", indent) .. "}"
+			
+			return kansei
+		end
+		
+		if (type(tab) == "string") then return tab end
+		
+		return tostring(tab)
+	end
+	
+	print("===========================")
+	print(printTable(toobj(str)))
+	
+	paramtripleplus[this] = toobj(str)
+end
+
+local et = require("et")
+
+function GetEaseValue(trt, frame, prevframe, last, prev, lastframe, params)
+	if (frame == nil) then
+		frame = obj.frame
+	end
+	if (trt == 1) then
+		return ((last - prev) * ((frame - prevframe) / (lastframe - prevframe))) + prev
+	elseif (trt == 2) then
+		return et.easing_a(params[1].value, frame - prevframe, prev, last - prev, (lastframe - prevframe))
+	end
+	return prev
+end
+
+function ColorToNumber(color)
+	return RGB(color.r, color.g, color.b)
+end
+
+function BoolToNumber(bool)
+	if (bool) then return 1 else return 0 end
+end
+
+function GetValue(v, name)
+	local last = nil
+	local prev = nil
+	local prevframe = 0
+	local sections = v[name]["Value"]["sections"]
+	for k,v2 in pairs(sections) do
+		if (obj.frame < v2.frame) then
+			last = v2
+			break
+		end
+		prev = v2.value
+		prevframe = v2.frame
+	end
+	if (last == nil) then
+		if (#sections > 0) then
+			return sections[#sections].value
+		else
+			return v[name]["Value"]["initialValue"]
+		end
+	end
+	
+	if (prev == nil) then
+		prev = v[name]["Value"]["initialValue"]
+	end
+	
+	if (last["_type"] == "ParamTriplePlus.Params.FloatSection") then
+		local trt = last["_transiontype"]
+		return GetEaseValue(trt, obj.frame, prevframe, last.value, prev, last.frame, last["transionParams"])
+	elseif (last["_type"] == "ParamTriplePlus.Params.Vector3Section") then
+		local trt = last["_transiontype"]
+		return {
+			x = GetEaseValue(trt, obj.frame, prevframe, last.value.x, prev.x, last.frame, last["transionParams"]),
+			y = GetEaseValue(trt, obj.frame, prevframe, last.value.y, prev.y, last.frame, last["transionParams"]),
+			z = GetEaseValue(trt, obj.frame, prevframe, last.value.z, prev.z, last.frame, last["transionParams"]),
+		}
+	end
+	
+	return prev
+end
+
+function numberToFigure(num)
+if (num == 0) then
+	return "”wŒi"
+elseif (num == 1) then
+	return "‰~"
+elseif (num == 2) then
+	return "ŽlŠpŒ`"
+end
+return "‰~"
+end
+
+local ptp_effects = require("effects")
+
+function effect(type, v, effect)
+	local ef = ptp_effects[type]
+	if (ef == nil) then
+		return
+	end
+	ef(v, effect)
+end
+
+function loadString(type, v, parent)
+if (parent == nil) then
+	parent = ""
+end
+if (type == "ParamTriplePlus.Params.AviUtl.FigureObject") then
+	obj.load("figure", numberToFigure(GetValue(v, "figure")), 0xffffff, GetValue(v, "size"), GetValue(v, "border"))
+elseif (type == "ParamTriplePlus.Params.AviUtl.TextObject") then
+	obj.setfont(GetValue(v, "font"), GetValue(v, "size"), 0, 0xffffff)
+	obj.load("text", GetValue(v, "text"))
+elseif (type == "ParamTriplePlus.Params.AviUtl.ImageObject") then
+	obj.load("image", GetValue(v, "image"))
+elseif (type == "ParamTriplePlus.Params.AviUtl.VideoObject") then
+	obj.load("movie", GetValue(v, "video"), (GetValue(v, "frame") + (obj.frame * (GetValue(v, "speed") / 100))) / obj.framerate)
+elseif (type == "ParamTriplePlus.Params.AviUtl.FrameBufferObject") then
+	obj.load("framebuffer")
+elseif (type == "ParamTriplePlus.Params.AviUtl.GroupObject") then
+	local i = 0
+	local min_x, min_y, max_x, max_y = 0, 0, 0, 0
+	for k,v2 in pairs(v.children) do
+		loadString(v2["_type"], v2, parent .. "group_")
+		
+		for _,v3 in pairs(v2.effects) do
+			effect(v3["_type"], v2, v3)
+		end
+		
+		rikky_module.image("w", "ptp_group_" .. parent .. i)
+		
+		local zoom = GetValue(v2, "zoom") / 100
+		local w,h,rz = obj.w * zoom,obj.h * zoom,GetValue(v2, "rotation").z
+		local pos = GetValue(v2, "position")
+		
+		local length = math.sqrt(math.pow(w / 2, 2) + math.pow(h / 2, 2))
+		local baseangle = math.atan2(h/2, w/2)
+		local baseangle_anti = (math.pi - baseangle)
+		
+		local p1x = math.cos(math.rad(-rz) + baseangle) * length
+		local p1y = math.sin(math.rad(-rz) + baseangle) * length
+		local p2x = math.cos(math.rad(-rz) - baseangle) * length
+		local p2y = math.sin(math.rad(-rz) - baseangle) * length
+		local p3x = math.cos(math.rad(-rz) + baseangle_anti) * length
+		local p3y = math.sin(math.rad(-rz) + baseangle_anti) * length
+		local p4x = math.cos(math.rad(-rz) - baseangle_anti) * length
+		local p4y = math.sin(math.rad(-rz) - baseangle_anti) * length
+		
+		local imaxx = math.max(p1x, p2x, p3x, p4x)
+		local iminx = math.min(p1x, p2x, p3x, p4x)
+		local imaxy = math.max(p1y, p2y, p3y, p4y)
+		local iminy = math.min(p1y, p2y, p3y, p4y)
+		
+		local maxx = pos.x + (imaxx)
+		local minx = pos.x + (iminx)
+		local maxy = pos.y + (imaxy)
+		local miny = pos.y + (iminy)
+		
+		if (maxx > max_x) then max_x = maxx end
+		if (minx < min_x) then min_x = minx end
+		if (maxy > max_y) then max_y = maxy end
+		if (miny < min_y) then min_y= miny end
+		
+		i = i + 1
+	end
+	
+	local w = math.max(max_x, -min_x) * 2
+	local h = math.max(max_y, -min_y) * 2
+	
+	obj.setoption("drawtarget", "tempbuffer", w, h)
+	i = 0
+	for k,v2 in pairs(v.children) do
+		rikky_module.image("r", "ptp_group_" .. parent .. i)
+		
+		local pos = GetValue(v2, "position")
+		local rot = GetValue(v2, "rotation")
+		local zoom = GetValue(v2, "zoom") / 100
+		local alpha = GetValue(v2, "alpha") / 100
+		
+		obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
+		rikky_module.image("c", "ptp_group_" .. parent .. i)
+		i = i + 1
+	end
+	
+	obj.load("tempbuffer")
+end
+end
+
+
+local ptp = paramtripleplus[this]
+
+for k,v in pairs(ptp) do
+	--print(v["_type"])
+	loadString(v["_type"], v)
+	
+	for _,v2 in pairs(v.effects) do
+		effect(v2["_type"], v, v2)
+	end
+	
+	local pos = GetValue(v, "position")
+	local rot = GetValue(v, "rotation")
+	local zoom = GetValue(v, "zoom") / 100
+	local alpha = GetValue(v, "alpha") / 100
+	
+	obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
+end

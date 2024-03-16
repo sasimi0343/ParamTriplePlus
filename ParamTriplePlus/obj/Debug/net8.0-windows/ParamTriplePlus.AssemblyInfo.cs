@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ParamTriplePlus")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+76e6dbcfb3456490342fc051c4c160fcc45f1aea")]
 [assembly: System.Reflection.AssemblyProductAttribute("ParamTriplePlus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ParamTriplePlus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

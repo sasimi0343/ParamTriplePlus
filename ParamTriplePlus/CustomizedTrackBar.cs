@@ -57,7 +57,11 @@ namespace ParamTriplePlus
                 {
                     clampedvalue = Minimum;
                 }
-                if (!IgnoreTrack) trackBar1.Value = (int)(clampedvalue * 100);
+                if (!IgnoreTrack)
+                {
+                    var valu = (int)(clampedvalue * 100);
+                    if (valu >= trackBar1.Minimum && valu <= trackBar1.Maximum) trackBar1.Value = valu;
+                }
                 numericUpDown1.Value = (decimal)this.value;
 
                 if (OnValueChanged != null)

@@ -61,7 +61,7 @@ namespace ParamTriplePlus.Params.AviUtl
         public Param<float> alpha = new Param<float>(100, 100, 0, "不透明度");
         public Param<Vector3> center = new Param<Vector3>(new Vector3(), "中心位置");
         public Param<BlendMode> blend = new Param<BlendMode>(BlendMode.Normal, "合成モード");
-
+        public Param<ClipMode> clipaboveobj = new Param<ClipMode>(ClipMode.なし, "上のオブジェクトにクリッピング");
 
         public List<AviutlEffect> effects = new List<AviutlEffect>();
         [JsonIgnore]
@@ -74,18 +74,15 @@ namespace ParamTriplePlus.Params.AviUtl
         public bool IsEnabled;
         public int index;
 
+        public string Name { get; protected set; }
 
-    }
+        public Condition condition = new Condition();
 
-    public class Condition
-    {
-        public Condition() { }
+        [JsonIgnore]
+        public GroupBox groupbox;
 
-    }
-
-    public interface IConditionPattern
-    {
-        public void Test();
+        [JsonIgnore]
+        public AviutlMediaObject parent;
     }
 
     public enum BlendMode
@@ -105,6 +102,14 @@ namespace ParamTriplePlus.Params.AviUtl
         Alpha_Add2 = 103,
         Alpha_Max = 101,
         Alpha_Sub = 102,
+    }
+
+    public enum ClipMode
+    {
+        なし,
+        クリッピングのみ,
+        クリッピングして元のオブジェクトを描画しない,
+        交差
     }
 
     public enum Figure
@@ -136,8 +141,9 @@ namespace ParamTriplePlus.Params.AviUtl
 
         public Param<float> size = new Param<float>(100, 9999, 0, "サイズ");
         public Param<string> font = new Param<string>(ParamType.Font, "フォント");
-        public Param<string> text = new Param<string>("テキスト");
+        public Param<string> text = new Param<string>(ParamType.MultiLine, "テキスト");
         public Param<bool> eachobject = new Param<bool>("個別オブジェクト");
+        public Param<Color> color = new Param<Color>(new Color(255, 255, 255), "色");
     }
 
     public class ImageObject : AviutlMediaObject

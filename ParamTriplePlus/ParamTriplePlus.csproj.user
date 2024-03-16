@@ -4,6 +4,12 @@
     <Compile Update="ColorTrackBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="ConditionBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="ConditionWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="CustomizedTrackBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
