@@ -29,12 +29,14 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            TreeNode treeNode2 = new TreeNode("Draw");
+            TreeNode treeNode1 = new TreeNode("Draw");
             menuStrip1 = new MenuStrip();
             Menu_Files = new ToolStripMenuItem();
             Files_NewObjectFile = new ToolStripMenuItem();
             Files_Open = new ToolStripMenuItem();
             Files_Save = new ToolStripMenuItem();
+            toolStripSeparator3 = new ToolStripSeparator();
+            設定ToolStripMenuItem = new ToolStripMenuItem();
             Menu_Help = new ToolStripMenuItem();
             Help_Version = new ToolStripMenuItem();
             tabControl1 = new TabControl();
@@ -47,6 +49,9 @@
             図形ToolStripMenuItem = new ToolStripMenuItem();
             テキストToolStripMenuItem = new ToolStripMenuItem();
             フレームバッファToolStripMenuItem = new ToolStripMenuItem();
+            CustomObjectToolStripMenuItem = new ToolStripMenuItem();
+            notAviUtlobjectToolStripMenuItem = new ToolStripMenuItem();
+            moreShapes3DToolStripMenuItem = new ToolStripMenuItem();
             saveFileDialog1 = new SaveFileDialog();
             openFileDialog1 = new OpenFileDialog();
             nodeTreeContext = new ContextMenuStrip(components);
@@ -59,10 +64,10 @@
             グループに移動ToolStripMenuItem = new ToolStripMenuItem();
             新規グループToolStripMenuItem = new ToolStripMenuItem();
             toolStripSeparator2 = new ToolStripSeparator();
+            toolStripMenuItem1 = new ToolStripMenuItem();
             上に移動ToolStripMenuItem = new ToolStripMenuItem();
             下に移動ToolStripMenuItem = new ToolStripMenuItem();
             effectMenu = new ContextMenuStrip(components);
-            toolStripMenuItem1 = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             tabControl1.SuspendLayout();
             mainTab.SuspendLayout();
@@ -81,7 +86,7 @@
             // 
             // Menu_Files
             // 
-            Menu_Files.DropDownItems.AddRange(new ToolStripItem[] { Files_NewObjectFile, Files_Open, Files_Save });
+            Menu_Files.DropDownItems.AddRange(new ToolStripItem[] { Files_NewObjectFile, Files_Open, Files_Save, toolStripSeparator3, 設定ToolStripMenuItem });
             Menu_Files.Name = "Menu_Files";
             Menu_Files.Size = new Size(53, 20);
             Menu_Files.Text = "ファイル";
@@ -106,6 +111,18 @@
             Files_Save.Text = "保存";
             Files_Save.Click += Files_Save_Click;
             // 
+            // toolStripSeparator3
+            // 
+            toolStripSeparator3.Name = "toolStripSeparator3";
+            toolStripSeparator3.Size = new Size(181, 6);
+            // 
+            // 設定ToolStripMenuItem
+            // 
+            設定ToolStripMenuItem.Name = "設定ToolStripMenuItem";
+            設定ToolStripMenuItem.Size = new Size(184, 22);
+            設定ToolStripMenuItem.Text = "設定";
+            設定ToolStripMenuItem.Click += 設定ToolStripMenuItem_Click;
+            // 
             // Menu_Help
             // 
             Menu_Help.DropDownItems.AddRange(new ToolStripItem[] { Help_Version });
@@ -116,8 +133,9 @@
             // Help_Version
             // 
             Help_Version.Name = "Help_Version";
-            Help_Version.Size = new Size(142, 22);
+            Help_Version.Size = new Size(180, 22);
             Help_Version.Text = "バージョン情報";
+            Help_Version.Click += Help_Version_Click;
             // 
             // tabControl1
             // 
@@ -157,9 +175,9 @@
             treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             treeView1.Location = new Point(3, 6);
             treeView1.Name = "treeView1";
-            treeNode2.Name = "Root";
-            treeNode2.Text = "Draw";
-            treeView1.Nodes.AddRange(new TreeNode[] { treeNode2 });
+            treeNode1.Name = "Root";
+            treeNode1.Text = "Draw";
+            treeView1.Nodes.AddRange(new TreeNode[] { treeNode1 });
             treeView1.Size = new Size(603, 384);
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
@@ -168,43 +186,62 @@
             // 
             // addObjectContext
             // 
-            addObjectContext.Items.AddRange(new ToolStripItem[] { 動画ToolStripMenuItem, 画像ToolStripMenuItem, 図形ToolStripMenuItem, テキストToolStripMenuItem, フレームバッファToolStripMenuItem });
+            addObjectContext.Items.AddRange(new ToolStripItem[] { 動画ToolStripMenuItem, 画像ToolStripMenuItem, 図形ToolStripMenuItem, テキストToolStripMenuItem, フレームバッファToolStripMenuItem, CustomObjectToolStripMenuItem, notAviUtlobjectToolStripMenuItem, moreShapes3DToolStripMenuItem });
             addObjectContext.Name = "addObjectContext";
-            addObjectContext.Size = new Size(142, 114);
+            addObjectContext.Size = new Size(206, 180);
             // 
             // 動画ToolStripMenuItem
             // 
             動画ToolStripMenuItem.Name = "動画ToolStripMenuItem";
-            動画ToolStripMenuItem.Size = new Size(141, 22);
+            動画ToolStripMenuItem.Size = new Size(205, 22);
             動画ToolStripMenuItem.Text = "動画";
             動画ToolStripMenuItem.Click += 動画ToolStripMenuItem_Click;
             // 
             // 画像ToolStripMenuItem
             // 
             画像ToolStripMenuItem.Name = "画像ToolStripMenuItem";
-            画像ToolStripMenuItem.Size = new Size(141, 22);
+            画像ToolStripMenuItem.Size = new Size(205, 22);
             画像ToolStripMenuItem.Text = "画像";
             画像ToolStripMenuItem.Click += 画像ToolStripMenuItem_Click;
             // 
             // 図形ToolStripMenuItem
             // 
             図形ToolStripMenuItem.Name = "図形ToolStripMenuItem";
-            図形ToolStripMenuItem.Size = new Size(141, 22);
+            図形ToolStripMenuItem.Size = new Size(205, 22);
             図形ToolStripMenuItem.Text = "図形";
             図形ToolStripMenuItem.Click += 図形ToolStripMenuItem_Click;
             // 
             // テキストToolStripMenuItem
             // 
             テキストToolStripMenuItem.Name = "テキストToolStripMenuItem";
-            テキストToolStripMenuItem.Size = new Size(141, 22);
+            テキストToolStripMenuItem.Size = new Size(205, 22);
             テキストToolStripMenuItem.Text = "テキスト";
             テキストToolStripMenuItem.Click += テキストToolStripMenuItem_Click;
             // 
             // フレームバッファToolStripMenuItem
             // 
             フレームバッファToolStripMenuItem.Name = "フレームバッファToolStripMenuItem";
-            フレームバッファToolStripMenuItem.Size = new Size(141, 22);
+            フレームバッファToolStripMenuItem.Size = new Size(205, 22);
             フレームバッファToolStripMenuItem.Text = "フレームバッファ";
+            フレームバッファToolStripMenuItem.Click += フレームバッファToolStripMenuItem_Click;
+            // 
+            // CustomObjectToolStripMenuItem
+            // 
+            CustomObjectToolStripMenuItem.Name = "CustomObjectToolStripMenuItem";
+            CustomObjectToolStripMenuItem.Size = new Size(205, 22);
+            CustomObjectToolStripMenuItem.Text = "カスタムオブジェクト";
+            // 
+            // notAviUtlobjectToolStripMenuItem
+            // 
+            notAviUtlobjectToolStripMenuItem.Name = "notAviUtlobjectToolStripMenuItem";
+            notAviUtlobjectToolStripMenuItem.Size = new Size(205, 22);
+            notAviUtlobjectToolStripMenuItem.Text = "NotAviUtlオブジェクト";
+            // 
+            // moreShapes3DToolStripMenuItem
+            // 
+            moreShapes3DToolStripMenuItem.Name = "moreShapes3DToolStripMenuItem";
+            moreShapes3DToolStripMenuItem.Size = new Size(205, 22);
+            moreShapes3DToolStripMenuItem.Text = "MoreShapes3Dオブジェクト";
             // 
             // saveFileDialog1
             // 
@@ -221,74 +258,82 @@
             // 
             nodeTreeContext.Items.AddRange(new ToolStripItem[] { コピーToolStripMenuItem, 切り取りToolStripMenuItem, 貼りつけToolStripMenuItem, ndc_remove, 名前の変更ToolStripMenuItem, toolStripSeparator1, グループに移動ToolStripMenuItem, 上に移動ToolStripMenuItem, 下に移動ToolStripMenuItem });
             nodeTreeContext.Name = "nodeTreeContext";
-            nodeTreeContext.Size = new Size(181, 208);
+            nodeTreeContext.Size = new Size(144, 186);
             // 
             // コピーToolStripMenuItem
             // 
             コピーToolStripMenuItem.Name = "コピーToolStripMenuItem";
-            コピーToolStripMenuItem.Size = new Size(180, 22);
+            コピーToolStripMenuItem.Size = new Size(143, 22);
             コピーToolStripMenuItem.Text = "コピー";
             // 
             // 切り取りToolStripMenuItem
             // 
             切り取りToolStripMenuItem.Name = "切り取りToolStripMenuItem";
-            切り取りToolStripMenuItem.Size = new Size(180, 22);
+            切り取りToolStripMenuItem.Size = new Size(143, 22);
             切り取りToolStripMenuItem.Text = "切り取り";
             // 
             // 貼りつけToolStripMenuItem
             // 
             貼りつけToolStripMenuItem.Name = "貼りつけToolStripMenuItem";
-            貼りつけToolStripMenuItem.Size = new Size(180, 22);
+            貼りつけToolStripMenuItem.Size = new Size(143, 22);
             貼りつけToolStripMenuItem.Text = "貼りつけ";
             // 
             // ndc_remove
             // 
             ndc_remove.Name = "ndc_remove";
-            ndc_remove.Size = new Size(180, 22);
+            ndc_remove.Size = new Size(143, 22);
             ndc_remove.Text = "削除";
             ndc_remove.Click += ndc_remove_Click;
             // 
             // 名前の変更ToolStripMenuItem
             // 
             名前の変更ToolStripMenuItem.Name = "名前の変更ToolStripMenuItem";
-            名前の変更ToolStripMenuItem.Size = new Size(180, 22);
+            名前の変更ToolStripMenuItem.Size = new Size(143, 22);
             名前の変更ToolStripMenuItem.Text = "名前の変更";
             // 
             // toolStripSeparator1
             // 
             toolStripSeparator1.Name = "toolStripSeparator1";
-            toolStripSeparator1.Size = new Size(177, 6);
+            toolStripSeparator1.Size = new Size(140, 6);
             // 
             // グループに移動ToolStripMenuItem
             // 
             グループに移動ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { 新規グループToolStripMenuItem, toolStripSeparator2, toolStripMenuItem1 });
             グループに移動ToolStripMenuItem.Name = "グループに移動ToolStripMenuItem";
-            グループに移動ToolStripMenuItem.Size = new Size(180, 22);
+            グループに移動ToolStripMenuItem.Size = new Size(143, 22);
             グループに移動ToolStripMenuItem.Text = "グループに移動";
             // 
             // 新規グループToolStripMenuItem
             // 
             新規グループToolStripMenuItem.Name = "新規グループToolStripMenuItem";
-            新規グループToolStripMenuItem.Size = new Size(180, 22);
+            新規グループToolStripMenuItem.Size = new Size(134, 22);
             新規グループToolStripMenuItem.Text = "新規グループ";
             新規グループToolStripMenuItem.Click += 新規グループToolStripMenuItem_Click;
             // 
             // toolStripSeparator2
             // 
             toolStripSeparator2.Name = "toolStripSeparator2";
-            toolStripSeparator2.Size = new Size(177, 6);
+            toolStripSeparator2.Size = new Size(131, 6);
+            // 
+            // toolStripMenuItem1
+            // 
+            toolStripMenuItem1.Enabled = false;
+            toolStripMenuItem1.Name = "toolStripMenuItem1";
+            toolStripMenuItem1.Size = new Size(134, 22);
+            toolStripMenuItem1.Text = "ルート";
+            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // 上に移動ToolStripMenuItem
             // 
             上に移動ToolStripMenuItem.Name = "上に移動ToolStripMenuItem";
-            上に移動ToolStripMenuItem.Size = new Size(180, 22);
+            上に移動ToolStripMenuItem.Size = new Size(143, 22);
             上に移動ToolStripMenuItem.Text = "上に移動";
             上に移動ToolStripMenuItem.Click += 上に移動ToolStripMenuItem_Click;
             // 
             // 下に移動ToolStripMenuItem
             // 
             下に移動ToolStripMenuItem.Name = "下に移動ToolStripMenuItem";
-            下に移動ToolStripMenuItem.Size = new Size(180, 22);
+            下に移動ToolStripMenuItem.Size = new Size(143, 22);
             下に移動ToolStripMenuItem.Text = "下に移動";
             下に移動ToolStripMenuItem.Click += 下に移動ToolStripMenuItem_Click;
             // 
@@ -296,14 +341,6 @@
             // 
             effectMenu.Name = "effectMenu";
             effectMenu.Size = new Size(61, 4);
-            // 
-            // toolStripMenuItem1
-            // 
-            toolStripMenuItem1.Enabled = false;
-            toolStripMenuItem1.Name = "toolStripMenuItem1";
-            toolStripMenuItem1.Size = new Size(180, 22);
-            toolStripMenuItem1.Text = "ルート";
-            toolStripMenuItem1.Click += toolStripMenuItem1_Click;
             // 
             // MainWindow
             // 
@@ -315,6 +352,7 @@
             MainMenuStrip = menuStrip1;
             Name = "MainWindow";
             Text = "ParamTriplePlus";
+            FormClosing += MainWindow_FormClosing;
             KeyDown += MainWindow_KeyDown;
             PreviewKeyDown += MainWindow_PreviewKeyDown;
             menuStrip1.ResumeLayout(false);
@@ -362,5 +400,10 @@
         private ToolStripMenuItem 下に移動ToolStripMenuItem;
         private ContextMenuStrip effectMenu;
         private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripSeparator toolStripSeparator3;
+        private ToolStripMenuItem 設定ToolStripMenuItem;
+        private ToolStripMenuItem CustomObjectToolStripMenuItem;
+        private ToolStripMenuItem notAviUtlobjectToolStripMenuItem;
+        private ToolStripMenuItem moreShapes3DToolStripMenuItem;
     }
 }

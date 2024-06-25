@@ -202,5 +202,12 @@ namespace ParamTriplePlus
         {
             if (OnDeleted != null) OnDeleted.Invoke();
         }
+
+        private void 値を設定するToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var dialog = new ValueSettingDialog(0, trackBar1.Maximum, 0, trackBar1.Value);
+            if (dialog.ShowDialog() != DialogResult.OK) return;
+            trackBar1.Value = (int)dialog.Value;
+        }
     }
 }

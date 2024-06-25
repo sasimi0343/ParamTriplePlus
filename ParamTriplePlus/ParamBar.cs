@@ -26,6 +26,18 @@ namespace ParamTriplePlus
             control.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
         }
 
+        public void SetHasTransition(bool tra)
+        {
+            if (tra)
+            {
+                BackColor = Color.FromArgb(255, 50, 150, 50);
+            }
+            else
+            {
+                BackColor = SystemColors.Control;
+            }
+        }
+
         public string Label { get => label1.Text; set => label1.Text = value; }
         public object param;
         public delegate void TransionButtonClickedEvent();

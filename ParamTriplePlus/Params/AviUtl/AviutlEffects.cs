@@ -233,6 +233,63 @@ namespace ParamTriplePlus.Params.AviUtl
     {
         public EFScript() { Name = "スクリプト制御"; }
 
-        public Param<string> width = new Param<string>(ParamType.MultiLine, "スクリプト");
+        public Param<string> script = new Param<string>(ParamType.MultiLine, "スクリプト");
     }
+
+    public class EFAnimation : AviutlEffect
+    {
+        public EFAnimation() { Name = "アニメーション効果"; }
+
+        public void SetAnimation(string name)
+        {
+            Name = name;
+            AnimationName = name;
+        }
+
+        public string AnimationName;
+    }
+
+    #region 基本効果
+
+    public class EFPosition : AviutlEffect
+    {
+        public EFPosition() { Name = "座標"; }
+
+        public Param<Vector3> pos = new Param<Vector3>(new Vector3(), "座標");
+    }
+
+    public class EFRotation : AviutlEffect
+    {
+        public EFRotation() { Name = "回転"; }
+
+        public Param<Vector3> rotation = new Param<Vector3>(new Vector3(), "回転");
+    }
+
+    public class EFZoom : AviutlEffect
+    {
+        public EFZoom() { Name = "拡大率"; }
+
+        public Param<float> zoom = new Param<float>(100, 9999, 0, true, "拡大率");
+        public Param<float> x = new Param<float>(100, 9999, 0, true, "X");
+        public Param<float> y = new Param<float>(100, 9999, 0, true, "Y");
+    }
+
+    public class EFAlpha : AviutlEffect
+    {
+        public EFAlpha() { Name = "不透明度"; }
+
+        public Param<float> alpha = new Param<float>(100, 100, 0, false, "不当明度");
+    }
+
+    public class EFExtend : AviutlEffect
+    {
+        public EFExtend() { Name = "領域拡張"; }
+
+        public Param<int> top = new Param<int>(0, 9999, 0, false, "上");
+        public Param<int> bottom = new Param<int>(0, 9999, 0, false, "下");
+        public Param<int> left = new Param<int>(0, 9999, 0, false, "左");
+        public Param<int> right = new Param<int>(0, 9999, 0, false, "右");
+    }
+
+    #endregion
 }

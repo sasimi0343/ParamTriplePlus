@@ -549,6 +549,27 @@ namespace ParamTriplePlus.Params
             Convert = 6,
         }
 
+        public TransionType _transiontype = TransionType.None;
+        [JsonIgnore]
+        public TransionType transiontype
+        {
+            get => _transiontype;
+            set
+            {
+                var prev = _transiontype;
+                _transiontype = value;
+                if (prev != _transiontype || transionParams == null)
+                {
+                    transionParams = GetParamTypes(_transiontype);
+                }
+                if (transionParams.Count > 0)
+                {
+                    var po = new PortableDialog(transionParams.ToArray());
+                    po.ShowDialog();
+                }
+            }
+        }
+
         public List<SimpleParam> transionParams;
         public List<SimpleParam> loopParams;
 
@@ -590,6 +611,26 @@ namespace ParamTriplePlus.Params
                 default:
                     return "移動無し";
             }
+        }
+
+        public static List<SimpleParam> GetParamTypes(TransionType transiontype)
+        {
+            switch (transiontype)
+            {
+                case TransionType.None:
+                    return new List<SimpleParam>();
+                case TransionType.Linear:
+                    return new List<SimpleParam>();
+                case TransionType.Easing:
+                    return [new SimpleParam(ParamType.Int, "番号")]; //番号
+                case TransionType.CurveEditor:
+                    return [new SimpleParam(ParamType.Int, "番号")]; //番号
+                case TransionType.Code:
+                    return [new SimpleParam(ParamType.MultiLine, "コード")]; //コード
+                default:
+                    break;
+            }
+            return new List<SimpleParam>();
         }
 
         public TextSection() : base()

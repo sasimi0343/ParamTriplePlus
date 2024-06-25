@@ -128,6 +128,7 @@ namespace ParamTriplePlus.Params.AviUtl
         }
         public Param<Figure> figure = new Param<Figure>(Figure.Circle, "図形の種類");
         public Param<float> size = new Param<float>(100, 9999, 0, "サイズ");
+        public Param<float> aspect = new Param<float>(0, 100, -100, "縦横比");
         public Param<float> border = new Param<float>(4000, 9999, 0, "幅");
         public Param<Color> color = new Param<Color>(new Color(255, 255, 255), "色");
     }
@@ -141,7 +142,7 @@ namespace ParamTriplePlus.Params.AviUtl
 
         public Param<float> size = new Param<float>(100, 9999, 0, "サイズ");
         public Param<string> font = new Param<string>(ParamType.Font, "フォント");
-        public Param<string> text = new Param<string>(ParamType.MultiLine, "テキスト");
+        public Param<string> text = new Param<string>(ParamType.Text, "テキスト");
         public Param<bool> eachobject = new Param<bool>("個別オブジェクト");
         public Param<Color> color = new Param<Color>(new Color(255, 255, 255), "色");
     }
@@ -186,6 +187,38 @@ namespace ParamTriplePlus.Params.AviUtl
         {
             Name = "フレームバッファ";
         }
+    }
+
+    public class CustomObject : AviutlMediaObject
+    {
+        public CustomObject()
+        {
+            Name = "カスタムオブジェクト";
+        }
+
+        public void SetCustomObject(string name)
+        {
+            CustomObjectName = name;
+            Name = name;
+        }
+
+        public string CustomObjectName;
+        public Param<float> track0 = new Param<float>(0, 9999, -9999, true, "数値1");
+        public Param<float> track1 = new Param<float>(0, 9999, -9999, true, "数値2");
+        public Param<float> track2 = new Param<float>(0, 9999, -9999, true, "数値3");
+        public Param<float> track3 = new Param<float>(0, 9999, -9999, true, "数値4");
+    }
+
+    public class WaveShape : AviutlMediaObject
+    {
+        public WaveShape()
+        {
+            Name = "音声波形";
+        }
+
+        public Param<float> width = new Param<float>(200, 9999, 0, "幅");
+        public Param<float> height = new Param<float>(100, 9999, 0, "高さ");
+        public Param<float> volume = new Param<float>(100, 9999, 0, "音量");
     }
 
     public class GroupObject : AviutlMediaObject

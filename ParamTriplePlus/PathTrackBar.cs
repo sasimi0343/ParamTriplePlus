@@ -12,6 +12,13 @@ namespace ParamTriplePlus
 {
     public partial class PathTrackBar : UserControl
     {
+        public PathTrackBar()
+        {
+            InitializeComponent();
+        }
+
+        public void SetMainWindow(MainWindow mainwindow) => mainWindow = mainwindow;
+
         public PathTrackBar(MainWindow mainwindow)
         {
             InitializeComponent();

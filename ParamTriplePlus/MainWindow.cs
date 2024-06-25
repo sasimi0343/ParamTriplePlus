@@ -1,22 +1,84 @@
+using ParamTriplePlus.CustomComponent;
 using ParamTriplePlus.Params;
 using ParamTriplePlus.Params.AviUtl;
+using ParamTriplePlus.Params.ExtremeTransition;
+using ParamTriplePlus.Params.MoreShapes3D;
 using ParamTriplePlus.Params.NotAviUtl;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace ParamTriplePlus
 {
     public partial class MainWindow : Form
     {
+        public string AviUtlPath { get; set; }
+        public string AquesTalkPlayerPath { get; set; }
+
         public MainWindow(string[] args)
         {
             InitializeComponent();
             CommandLineArgs = args;
 
+            if (string.IsNullOrEmpty(Properties.Settings.Default.AviutlPath))
+            {
+                AviUtlPath = AviUtlExePath(Application.StartupPath);
+                Properties.Settings.Default.AviutlPath = AviUtlPath;
+            }
+            else
+            {
+                AviUtlPath = Properties.Settings.Default.AviutlPath;
+            }
+
+            AquesTalkPlayerPath = Properties.Settings.Default.AquesTalkPlayerPath;
+
             treeView1.ExpandAll();
 
             InitializeAllEffects();
+            InitializeAllObjects();
+
+            var task = Task.Run(() =>
+            {
+                AviUtlLuaFile.LoadFolder(AviUtlPath);
+                /*foreach (var item in AviUtlLuaFile.files)
+                {
+                    if (IsDisposed) return;
+                    switch (item.LuaType)
+                    {
+                        case ScriptType.Animation:
+                            foreach (var lua in item.luaList)
+                            {
+                                if (IsDisposed) return;
+                                if (!IsDisposed) Invoke(() =>
+                                {
+                                    if (!IsDisposed) AddEffectTreeAnimation(lua.FullName, animationMenuItem);
+                                });
+                            }
+                            break;
+                        case ScriptType.CustomObject:
+                            foreach (var lua in item.luaList)
+                            {
+                                if (IsDisposed) return;
+                                if (!IsDisposed) Invoke(() =>
+                                {
+                                    if (!IsDisposed) AddCustomObjectTree(lua.FullName);
+                                });
+                            }
+                            break;
+                        case ScriptType.CameraControl:
+                            break;
+                        case ScriptType.SceneTransition:
+                            break;
+                        case ScriptType.Transion:
+                            break;
+                        default:
+                            break;
+                    }
+                }*/
+            });
+
+            Disposed += (_, _) =>
+            {
+                task.Dispose();
+            };
 
             if (args.Length > 0)
             {
@@ -24,6 +86,11 @@ namespace ParamTriplePlus
                 File.WriteAllText(System.IO.Path.Combine(Application.StartupPath, "running"), CurrentPath);
                 Open();
             }
+        }
+
+        private string AviUtlExePath(string path)
+        {
+            return string.IsNullOrEmpty(path) ? "" : (File.Exists(System.IO.Path.Combine(path, "aviutl.exe")) ? path : AviUtlExePath(System.IO.Path.GetDirectoryName(path)));
         }
 
         private ContextMenuStrip effectMenu_short;
@@ -64,7 +131,45 @@ namespace ParamTriplePlus
             AddEffectTree(typeof(EFRaster), blur);
             AddEffectTree(typeof(EFPolarCoordinateTransform), blur);
             AddEffectTree(typeof(EFDisplacementMap), blur);
+            AddEffectTree(typeof(EFScript));
+            blur = AddEffectTree("基本効果");
+            AddEffectTree(typeof(EFPosition), blur);
+            AddEffectTree(typeof(EFRotation), blur);
+            AddEffectTree(typeof(EFZoom), blur);
+            AddEffectTree(typeof(EFAlpha), blur);
+            AddEffectTree(typeof(EFExtend), blur);
+
+
+            blur = AddEffectTree("ExtremeTransition");
+            AddEffectTree(typeof(ETShowDelayed), blur);
+            AddEffectTree(typeof(ETBlink), blur);
+            AddEffectTree(typeof(ETMove), blur);
+            AddEffectTree(typeof(ETRotate), blur);
+            AddEffectTree(typeof(ETZoom), blur);
+
+            animationMenuItem = AddEffectTree("アニメーション効果");
         }
+
+        private void InitializeAllObjects()
+        {
+            AddNotAviutlObjectTree(typeof(Cross));
+            AddNotAviutlObjectTree(typeof(Box));
+            AddNotAviutlObjectTree(typeof(StopSign));
+            AddNotAviutlObjectTree(typeof(Arrow1));
+            AddNotAviutlObjectTree(typeof(Arrow2));
+            AddNotAviutlObjectTree(typeof(CheckPattern));
+            AddNotAviutlObjectTree(typeof(TriPoly));
+            AddNotAviutlObjectTree(typeof(QuadPoly));
+            AddNotAviutlObjectTree(typeof(Octagon));
+
+            AddNotAviutlObjectTree(typeof(MS3D_Box), moreShapes3DToolStripMenuItem);
+            AddNotAviutlObjectTree(typeof(MS3D_Sphere), moreShapes3DToolStripMenuItem);
+            AddNotAviutlObjectTree(typeof(MS3D_Corn), moreShapes3DToolStripMenuItem);
+            AddNotAviutlObjectTree(typeof(MS3D_Pillar), moreShapes3DToolStripMenuItem);
+            AddNotAviutlObjectTree(typeof(MS3D_Ring), moreShapes3DToolStripMenuItem);
+        }
+
+        private ToolStripMenuItem animationMenuItem;
 
         public void UpdateTitle()
         {
@@ -167,6 +272,51 @@ namespace ParamTriplePlus
             eff2.Click += (_, _) =>
             {
                 AddEffect(tabList[tabControl1.SelectedTab], (AviutlEffect)type.GetConstructors()[0].Invoke(new object[] { }));
+            };
+        }
+
+        private void AddEffectTreeAnimation(string name, ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? effectMenu.Items : parent.DropDownItems;
+            var eff = (ToolStripMenuItem)itemlist.Add(name);
+            var eff2 = (ToolStripMenuItem)effectMenu_short.Items.Add(name);
+            eff.Click += (_, _) =>
+            {
+                var animation = new EFAnimation();
+                animation.SetAnimation(name);
+                AddEffect(tabList[tabControl1.SelectedTab], animation);
+            };
+            eff2.Click += (_, _) =>
+            {
+                var animation = new EFAnimation();
+                animation.SetAnimation(name);
+                AddEffect(tabList[tabControl1.SelectedTab], animation);
+            };
+        }
+
+        private void AddCustomObjectTree(string name, ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? CustomObjectToolStripMenuItem.DropDownItems : parent.DropDownItems;
+            var obj = (ToolStripMenuItem)itemlist.Add(name);
+            obj.Click += (_, _) =>
+            {
+                var custom = new CustomObject();
+                custom.SetCustomObject(name);
+
+
+                AddObject(custom);
+            };
+        }
+
+        private void AddNotAviutlObjectTree(Type t, ToolStripMenuItem parent = null)
+        {
+            var itemlist = parent == null ? notAviUtlobjectToolStripMenuItem.DropDownItems : parent.DropDownItems;
+            var obj = (ToolStripMenuItem)itemlist.Add((string)t.GetProperty("Name").GetValue(t.GetConstructors()[0].Invoke(new object[0])));
+            obj.Click += (_, _) =>
+            {
+                var custom = t.GetConstructors()[0].Invoke(new object[0]);
+
+                AddObject((AviutlMediaObject)custom);
             };
         }
 
@@ -454,6 +604,19 @@ namespace ParamTriplePlus
                     parambar.SetPanel(boolText);
                     break;
                 case ParamType.Text:
+                    var textparam = (Param<string>)param;
+                    var textText = new TextDecoratorTrackBar();
+                    textText.TextValue = textparam.Value.initialValue;
+                    textText.OnTextValueChanged += (a) =>
+                    {
+                        textparam.Value.sections[parambar.index].value = a;
+                    };
+
+                    textText.Height = 128;
+
+                    parambar.Height = textText.Height;
+
+                    parambar.SetPanel(textText);
                     break;
                 case ParamType.Vector2:
                     var vec2param = (Param<Vector2>)param;
@@ -657,7 +820,17 @@ namespace ParamTriplePlus
 
                     return boolText;
                 case ParamType.Text:
-                    break;
+                    var textparam = (Param<string>)param;
+                    var textText = new TextDecoratorTrackBar();
+                    textText.TextValue = textparam.Value.initialValue;
+                    textText.OnTextValueChanged += (a) =>
+                    {
+                        textparam.Value.initialValue = a;
+                    };
+
+                    textText.Height = 128;
+
+                    return textText;
                 case ParamType.Vector2:
                     var vec2param = (Param<Vector2>)param;
                     var vec2num = new Vector2TrackBar();
@@ -707,12 +880,14 @@ namespace ParamTriplePlus
             {
                 var tra = new TransionDialog(this, ParamList.GetProperty<object>(param, "Value"), param, mediaobject.length.Value.initialValue);
                 tra.ShowDialog();
+                track.SetHasTransition(ParamList.GetProperty<int>(ParamList.GetField<object>(ParamList.GetProperty<object>(param, "Value"), "sections"), "Count") != 0);
             };
             track.DisableTransion = ParamList.GetField<bool>(param, "DisableTransion");
 
             var panel = CreateParamUI(param);
-            track.Height = panel.Height;
+            track.Height = panel is ComboBox ? panel.Height + 6 : panel.Height;
             track.SetPanel(panel);
+            track.SetHasTransition(ParamList.GetProperty<int>(ParamList.GetField<object>(ParamList.GetProperty<object>(param, "Value"), "sections"), "Count") != 0);
         }
 
         private void AddObjectButton_Click(object sender, EventArgs e)
@@ -982,6 +1157,28 @@ namespace ParamTriplePlus
             var node = treeView1.SelectedNode;
             if (node == null) return;
             ChangeParent(node, null);
+        }
+
+        private void フレームバッファToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddObject(new FrameBufferObject());
+        }
+
+        private void 設定ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new SettingDialog(this).ShowDialog();
+        }
+
+        private void MainWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.AviutlPath = AviUtlPath;
+            Properties.Settings.Default.AquesTalkPlayerPath = AquesTalkPlayerPath;
+            Properties.Settings.Default.Save();
+        }
+
+        private void Help_Version_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

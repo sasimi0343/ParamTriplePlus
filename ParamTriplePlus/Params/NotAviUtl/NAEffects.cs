@@ -16,6 +16,7 @@ namespace ParamTriplePlus.Params.NotAviUtl
         public Param<float> angle = new Param<float>(0, 9999, -9999, true, "角度");
         public Param<float> alpha = new Param<float>(100, 100, 0, false, "不透明度");
         public Param<Color> color = new Param<Color>(new Color(255, 255, 255), "色");
+        public Param<bool> centerTo = new Param<bool>("中心位置を変更");
     }
 
     public class EFInnerShadow : AviutlEffect

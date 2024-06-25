@@ -28,10 +28,19 @@
     <Compile Update="PortableDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="SettingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="SimpleParamBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="TextDecoratorTrackBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="TransionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ValueSettingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Vector3TrackBar.cs">

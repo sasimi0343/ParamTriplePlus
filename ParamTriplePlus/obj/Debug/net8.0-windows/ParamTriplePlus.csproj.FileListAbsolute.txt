@@ -28,3 +28,7 @@ E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePl
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.Vector2TrackBar.resources
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.ConditionBar.resources
 E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.ConditionWindow.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.ValueSettingDialog.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\bin\Debug\net8.0-windows\ParamTriplePlus.dll.config
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.SettingDialog.resources
+E:\VSRepo\ParamTriplePlus\ParamTriplePlus\obj\Debug\net8.0-windows\ParamTriplePlus.TextDecoratorTrackBar.resources

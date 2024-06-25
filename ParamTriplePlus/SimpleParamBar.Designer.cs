@@ -36,7 +36,10 @@
             transion_any = new ContextMenuStrip(components);
             trackBar1 = new TrackBar();
             button1 = new Button();
+            context_setvalue = new ContextMenuStrip(components);
+            値を設定するToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)trackBar1).BeginInit();
+            context_setvalue.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -96,6 +99,19 @@
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
+            // context_setvalue
+            // 
+            context_setvalue.Items.AddRange(new ToolStripItem[] { 値を設定するToolStripMenuItem });
+            context_setvalue.Name = "context_setvalue";
+            context_setvalue.Size = new Size(181, 48);
+            // 
+            // 値を設定するToolStripMenuItem
+            // 
+            値を設定するToolStripMenuItem.Name = "値を設定するToolStripMenuItem";
+            値を設定するToolStripMenuItem.Size = new Size(180, 22);
+            値を設定するToolStripMenuItem.Text = "値を設定";
+            値を設定するToolStripMenuItem.Click += 値を設定するToolStripMenuItem_Click;
+            // 
             // SimpleParamBar
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -107,6 +123,7 @@
             Name = "SimpleParamBar";
             Size = new Size(775, 32);
             ((System.ComponentModel.ISupportInitialize)trackBar1).EndInit();
+            context_setvalue.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -118,5 +135,7 @@
         private ContextMenuStrip transion_any;
         public TrackBar trackBar1;
         private Button button1;
+        private ContextMenuStrip context_setvalue;
+        private ToolStripMenuItem 値を設定するToolStripMenuItem;
     }
 }

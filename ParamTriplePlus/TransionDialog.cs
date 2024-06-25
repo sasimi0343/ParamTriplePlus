@@ -135,6 +135,15 @@ namespace ParamTriplePlus
                 pairs.Add(parambar);
                 i++;
             }
+            if (i < spbs.Count)
+            {
+                var at = i;
+                for (;i < spbs.Count;i++)
+                {
+                    spbs[i].Parent = null;
+                }
+                spbs.RemoveRange(at, i-at);
+            }
         }
 
         public List<SimpleParamBar> pairs = new List<SimpleParamBar>();
