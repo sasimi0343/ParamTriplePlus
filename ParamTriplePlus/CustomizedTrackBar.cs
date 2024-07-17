@@ -21,6 +21,24 @@ namespace ParamTriplePlus
 
         public event TrackBarValueChanged OnValueChanged;
 
+        private bool isInt = false;
+        public bool IsInt
+        {
+            get => isInt;
+            set
+            {
+                isInt = value;
+                if (value)
+                {
+                    numericUpDown1.DecimalPlaces = 0;
+                }
+                else
+                {
+                    numericUpDown1.DecimalPlaces = 2;
+                }
+            }
+        }
+
         private bool numRangeOut = false;
         public bool NumRangeOut
         {

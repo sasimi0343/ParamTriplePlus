@@ -1,4 +1,5 @@
-﻿using ParamTriplePlus.Params;
+﻿using ParamTriplePlus.ExoGenerator;
+using ParamTriplePlus.Params;
 using ParamTriplePlus.Params.AviUtl;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ParamTriplePlus
 {
@@ -25,6 +27,28 @@ namespace ParamTriplePlus
 
             if (objects.Count > 0) kansei = kansei.Substring(0, kansei.Length - 1);
             kansei += "]";
+            return kansei;
+        }
+
+        public static string ToJson(object obj)
+        {
+            return JsonType(obj);
+        }
+
+        public static string ToJson(Dictionary<string, object> dic)
+        {
+            return JsonType(dic);
+        }
+
+        private static string JsonType(Dictionary<string, object> dic)
+        {
+            var kansei = "{";
+            foreach (var item in dic)
+            {
+                kansei += AddProperty(item.Key, item.Value);
+            }
+            if (dic.Count > 0) kansei = kansei.Substring(0, kansei.Length - 1);
+            kansei += "}";
             return kansei;
         }
 
@@ -112,15 +136,16 @@ namespace ParamTriplePlus
                 var col = (Params.Color)value;
                 return "{\"r\":" + col.r + ",\"g\":" + col.g + ",\"b\":" + col.b + "}";
             }
-            if (value.GetType().IsEnum)
+            var type = value.GetType();
+            if (type.IsEnum)
             {
                 return ((int)value).ToString();
             }
             if (value is string)
             {
-                return "\"" + (string)value + "\"";
+                return "\"" + ((string)value).Replace("\"", "\\\"") + "\"";
             }
-            if (value.GetType().IsArray)
+            if (type.IsArray)
             {
                 var kansei = "[";
                 foreach (var item in (Array)value)
@@ -131,16 +156,47 @@ namespace ParamTriplePlus
                 kansei += "]";
                 return kansei;
             }
-            if (value.GetType().Name == typeof(List<object>).Name)
+            if (type.Name == typeof(List<object>).Name)
             {
                 var kansei = "[";
-                var array = (Array)value.GetType().GetMethod("ToArray").Invoke(value, new object[0]);
+                var array = (Array)type.GetMethod("ToArray").Invoke(value, new object[0]);
                 foreach (var item in array)
                 {
                     kansei += JsonType(item) + ",";
                 }
                 if (array.Length > 0) kansei = kansei.Substring(0, kansei.Length - 1);
                 kansei += "]";
+                return kansei;
+            }
+            if (type.Name == typeof(Dictionary<string, string>).Name)
+            {
+                var kansei = "{";
+                if (type.GenericTypeArguments[0].Name == typeof(string).Name)
+                {
+                    var en = value.GetType().GetMethod("GetEnumerator").Invoke(value, []);
+                    var count = (int)ClassUtil.GetProperty(value, "Count");
+                    for (var i = 0;i < count;i++)
+                    {
+                        ClassUtil.InvokeMethod(en, "MoveNext");
+                        var prop = ClassUtil.GetProperty(en, "Current");
+                        Trace.WriteLine("Key: " + ClassUtil.GetProperty(prop, "Key") + ", Value: " + ClassUtil.GetProperty(prop, "Value"));
+                        kansei += "\"" + ClassUtil.GetProperty(prop, "Key") + "\":" + JsonType(ClassUtil.GetProperty(prop, "Value")) + ",";
+                    }
+                    if (count > 0) kansei = kansei.Substring(0, kansei.Length - 1);
+                    kansei += "}";
+                    return kansei;
+
+                }
+                var listtype = Type.GetType("System.Collections.Generic.List`1[[" + type.GenericTypeArguments[0].FullName + ", " + type.GenericTypeArguments[0].Assembly.FullName + "]]");
+                var array = (Array)(listtype.GetMethod("ToArray").Invoke(listtype.GetConstructors()[0].Invoke(new object[] { ClassUtil.GetProperty(value, "Count") }), new object[0]));
+                ClassUtil.InvokeMethod(ClassUtil.GetProperty(value, "Keys"), "CopyTo", [array, 0]);
+                foreach (var key in array)
+                {
+                    var item = type.GetProperty("Item").GetValue(value, new object[] { key });
+                    kansei += JsonType(key) + ":" + JsonType(item) + ",";
+                }
+                if (array.Length > 0) kansei = kansei.Substring(0, kansei.Length - 1);
+                kansei += "}";
                 return kansei;
             }
             return JsonTypeClass(value);
@@ -160,6 +216,11 @@ namespace ParamTriplePlus
                 list.Add((AviutlMediaObject)item);
             }
             return list;
+        }
+
+        public static T FromJSON<T>(string str)
+        {
+            return (T)Generate(str);
         }
 
         private static Type ReturnBaseType(Type t)
@@ -222,6 +283,9 @@ namespace ParamTriplePlus
                     basetype.Name == typeof(Param<object>).Name ||
                     basetype.Name == typeof(Transion<object>).Name ||
                     basetype.Name == typeof(TransionSection<object>).Name ||
+                    basetype == typeof(Condition) ||
+                    basetype == typeof(ExoSettings) ||
+                    basetype == typeof(ExoSettingSection) ||
                     basetype.Name == typeof(SimpleParam).Name
                     )
                 {
@@ -430,6 +494,8 @@ namespace ParamTriplePlus
         }
 
         #endregion
+
+        //メズマライザーはないです
     }
 
     public static class ClassUtil
@@ -525,6 +591,11 @@ namespace ParamTriplePlus
             return (T)property.GetValue(obj);
         }
 
-        
+        public static void InvokeMethod(object obj, string name, object[] param = null)
+        {
+            var method = obj.GetType().GetMethod(name);
+            if (method != null) return;
+            method.Invoke(obj, param);
+        }
     }
 }

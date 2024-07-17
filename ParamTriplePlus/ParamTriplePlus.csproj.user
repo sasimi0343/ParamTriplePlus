@@ -13,6 +13,12 @@
     <Compile Update="CustomizedTrackBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="ExoGenerator\ExoGenerator.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="ExoGenerator\ExoSettingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="FontTrackBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -33,6 +39,9 @@
     </Compile>
     <Compile Update="SimpleParamBar.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="StringSettingDialog.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Update="TextDecoratorTrackBar.cs">
       <SubType>UserControl</SubType>

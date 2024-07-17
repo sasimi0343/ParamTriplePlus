@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            TreeNode treeNode1 = new TreeNode("Draw");
+            TreeNode treeNode3 = new TreeNode("Draw");
             menuStrip1 = new MenuStrip();
             Menu_Files = new ToolStripMenuItem();
             Files_NewObjectFile = new ToolStripMenuItem();
@@ -37,6 +37,8 @@
             Files_Save = new ToolStripMenuItem();
             toolStripSeparator3 = new ToolStripSeparator();
             設定ToolStripMenuItem = new ToolStripMenuItem();
+            exo生成機ToolStripMenuItem = new ToolStripMenuItem();
+            ExoGenSettingsToolStripMenuItem = new ToolStripMenuItem();
             Menu_Help = new ToolStripMenuItem();
             Help_Version = new ToolStripMenuItem();
             tabControl1 = new TabControl();
@@ -52,6 +54,7 @@
             CustomObjectToolStripMenuItem = new ToolStripMenuItem();
             notAviUtlobjectToolStripMenuItem = new ToolStripMenuItem();
             moreShapes3DToolStripMenuItem = new ToolStripMenuItem();
+            characterBoneToolStripMenuItem = new ToolStripMenuItem();
             saveFileDialog1 = new SaveFileDialog();
             openFileDialog1 = new OpenFileDialog();
             nodeTreeContext = new ContextMenuStrip(components);
@@ -68,6 +71,7 @@
             上に移動ToolStripMenuItem = new ToolStripMenuItem();
             下に移動ToolStripMenuItem = new ToolStripMenuItem();
             effectMenu = new ContextMenuStrip(components);
+            ShowExoGeneratorToolStripMenuItem = new ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             tabControl1.SuspendLayout();
             mainTab.SuspendLayout();
@@ -86,7 +90,7 @@
             // 
             // Menu_Files
             // 
-            Menu_Files.DropDownItems.AddRange(new ToolStripItem[] { Files_NewObjectFile, Files_Open, Files_Save, toolStripSeparator3, 設定ToolStripMenuItem });
+            Menu_Files.DropDownItems.AddRange(new ToolStripItem[] { Files_NewObjectFile, Files_Open, Files_Save, toolStripSeparator3, 設定ToolStripMenuItem, exo生成機ToolStripMenuItem });
             Menu_Files.Name = "Menu_Files";
             Menu_Files.Size = new Size(53, 20);
             Menu_Files.Text = "ファイル";
@@ -123,6 +127,20 @@
             設定ToolStripMenuItem.Text = "設定";
             設定ToolStripMenuItem.Click += 設定ToolStripMenuItem_Click;
             // 
+            // exo生成機ToolStripMenuItem
+            // 
+            exo生成機ToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { ExoGenSettingsToolStripMenuItem, ShowExoGeneratorToolStripMenuItem });
+            exo生成機ToolStripMenuItem.Name = "exo生成機ToolStripMenuItem";
+            exo生成機ToolStripMenuItem.Size = new Size(184, 22);
+            exo生成機ToolStripMenuItem.Text = "Exo生成機";
+            // 
+            // ExoGenSettingsToolStripMenuItem
+            // 
+            ExoGenSettingsToolStripMenuItem.Name = "ExoGenSettingsToolStripMenuItem";
+            ExoGenSettingsToolStripMenuItem.Size = new Size(180, 22);
+            ExoGenSettingsToolStripMenuItem.Text = "新規生成機";
+            ExoGenSettingsToolStripMenuItem.Click += ExoGenSettingsToolStripMenuItem_Click;
+            // 
             // Menu_Help
             // 
             Menu_Help.DropDownItems.AddRange(new ToolStripItem[] { Help_Version });
@@ -133,7 +151,7 @@
             // Help_Version
             // 
             Help_Version.Name = "Help_Version";
-            Help_Version.Size = new Size(180, 22);
+            Help_Version.Size = new Size(142, 22);
             Help_Version.Text = "バージョン情報";
             Help_Version.Click += Help_Version_Click;
             // 
@@ -175,9 +193,9 @@
             treeView1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             treeView1.Location = new Point(3, 6);
             treeView1.Name = "treeView1";
-            treeNode1.Name = "Root";
-            treeNode1.Text = "Draw";
-            treeView1.Nodes.AddRange(new TreeNode[] { treeNode1 });
+            treeNode3.Name = "Root";
+            treeNode3.Text = "Draw";
+            treeView1.Nodes.AddRange(new TreeNode[] { treeNode3 });
             treeView1.Size = new Size(603, 384);
             treeView1.TabIndex = 0;
             treeView1.AfterSelect += treeView1_AfterSelect;
@@ -186,9 +204,9 @@
             // 
             // addObjectContext
             // 
-            addObjectContext.Items.AddRange(new ToolStripItem[] { 動画ToolStripMenuItem, 画像ToolStripMenuItem, 図形ToolStripMenuItem, テキストToolStripMenuItem, フレームバッファToolStripMenuItem, CustomObjectToolStripMenuItem, notAviUtlobjectToolStripMenuItem, moreShapes3DToolStripMenuItem });
+            addObjectContext.Items.AddRange(new ToolStripItem[] { 動画ToolStripMenuItem, 画像ToolStripMenuItem, 図形ToolStripMenuItem, テキストToolStripMenuItem, フレームバッファToolStripMenuItem, CustomObjectToolStripMenuItem, notAviUtlobjectToolStripMenuItem, moreShapes3DToolStripMenuItem, characterBoneToolStripMenuItem });
             addObjectContext.Name = "addObjectContext";
-            addObjectContext.Size = new Size(206, 180);
+            addObjectContext.Size = new Size(206, 202);
             // 
             // 動画ToolStripMenuItem
             // 
@@ -242,6 +260,13 @@
             moreShapes3DToolStripMenuItem.Name = "moreShapes3DToolStripMenuItem";
             moreShapes3DToolStripMenuItem.Size = new Size(205, 22);
             moreShapes3DToolStripMenuItem.Text = "MoreShapes3Dオブジェクト";
+            // 
+            // characterBoneToolStripMenuItem
+            // 
+            characterBoneToolStripMenuItem.Name = "characterBoneToolStripMenuItem";
+            characterBoneToolStripMenuItem.Size = new Size(205, 22);
+            characterBoneToolStripMenuItem.Text = "CharacterBone";
+            characterBoneToolStripMenuItem.Click += characterBoneToolStripMenuItem_Click;
             // 
             // saveFileDialog1
             // 
@@ -342,6 +367,13 @@
             effectMenu.Name = "effectMenu";
             effectMenu.Size = new Size(61, 4);
             // 
+            // ShowExoGeneratorToolStripMenuItem
+            // 
+            ShowExoGeneratorToolStripMenuItem.Name = "ShowExoGeneratorToolStripMenuItem";
+            ShowExoGeneratorToolStripMenuItem.Size = new Size(180, 22);
+            ShowExoGeneratorToolStripMenuItem.Text = "生成器を表示";
+            ShowExoGeneratorToolStripMenuItem.Click += ShowExoGeneratorToolStripMenuItem_Click;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -405,5 +437,9 @@
         private ToolStripMenuItem CustomObjectToolStripMenuItem;
         private ToolStripMenuItem notAviUtlobjectToolStripMenuItem;
         private ToolStripMenuItem moreShapes3DToolStripMenuItem;
+        private ToolStripMenuItem characterBoneToolStripMenuItem;
+        private ToolStripMenuItem exo生成機ToolStripMenuItem;
+        private ToolStripMenuItem ExoGenSettingsToolStripMenuItem;
+        private ToolStripMenuItem ShowExoGeneratorToolStripMenuItem;
     }
 }

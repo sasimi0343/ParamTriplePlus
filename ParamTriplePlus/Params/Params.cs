@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ParamTriplePlus.Params
 {
@@ -62,6 +61,10 @@ namespace ParamTriplePlus.Params
                     options.Add(item.ToString());
                 }
             }
+            else if (typeof(T).Name == typeof(List<object>).Name)
+            {
+                paramtype = ParamType.List;
+            }
         }
 
         public Param()
@@ -111,6 +114,14 @@ namespace ParamTriplePlus.Params
             this.label = label;
             Value = new Transion<T>(this);
             paramtype = param;
+        }
+
+        public Param(ParamType param, T initial, string label = "")
+        {
+            this.label = label;
+            Value = new Transion<T>(this);
+            paramtype = param;
+            Value.initialValue = initial;
         }
 
         public void SetInitial(T value)
@@ -223,6 +234,81 @@ namespace ParamTriplePlus.Params
         {
             return GetParams(this);
         }
+
+        public static object CreateParam(ParamType paramtype, string label, object initialValue)
+        {
+            var type = GetParamTypeType(paramtype);
+
+            if (type.Name == typeof(decimal).Name)
+            {
+                return new Param<decimal>(paramtype, label);
+            }
+            else if (type.Name == typeof(float).Name)
+            {
+                return new Param<float>(paramtype, label);
+            }
+            else if (type.Name == typeof(int).Name)
+            {
+                return new Param<int>(paramtype, label);
+            }
+            else if (type.Name == typeof(string).Name)
+            {
+                return new Param<string>(paramtype, label);
+            }
+
+            var typename = "ParamTriplePlus.Params.Param`1[[" + type.FullName + ", " + type.Assembly.FullName + "]]";
+
+            var t = Type.GetType(typename);
+            var sec = t.GetConstructors()[1].Invoke(new object[] { paramtype, initialValue, label });
+            return sec;
+        }
+
+        public static Type GetParamTypeType(ParamType type)
+        {
+            switch (type)
+            {
+                case ParamType.Number:
+                    return typeof(decimal);
+                case ParamType.Float:
+                    return typeof(float);
+                case ParamType.Int:
+                    return typeof(int);
+                case ParamType.String:
+                    return typeof(string);
+                case ParamType.File:
+                    return typeof(string);
+                case ParamType.Folder:
+                    return typeof(string);
+                case ParamType.MultiLine:
+                    return typeof(string);
+                case ParamType.Font:
+                    return typeof(string);
+                case ParamType.Color:
+                    return typeof(Color);
+                case ParamType.Point:
+                    return typeof(Vector2);
+                case ParamType.List:
+                    break;
+                case ParamType.Combo:
+                    break;
+                case ParamType.Boolean:
+                    return typeof(bool);
+                case ParamType.Text:
+                    return typeof(string);
+                case ParamType.Vector2:
+                    return typeof(Vector2);
+                case ParamType.Vector3:
+                    return typeof(Vector3);
+                case ParamType.Dialog:
+                    break;
+                case ParamType.Button:
+                    break;
+                default:
+                    break;
+            }
+
+            return null;
+        }
     }
 
     public class Transion<T>
@@ -308,6 +394,7 @@ namespace ParamTriplePlus.Params
         public static object Default(Type type)
         {
             if (type == typeof(float)) return 0f;
+            if (type == typeof(decimal)) return (decimal)0;
             if (type == typeof(int)) return 0;
             if (type == typeof(string)) return "";
             if (type == typeof(Color)) return new Color(255, 255, 255);

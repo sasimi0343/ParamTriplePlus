@@ -249,6 +249,27 @@ namespace ParamTriplePlus.Params.AviUtl
         public string AnimationName;
     }
 
+    public class EFLoopImage : AviutlEffect
+    {
+        public EFLoopImage() { Name = "画像ループ"; }
+
+        public Param<int> width = new Param<int>(1, 60, 1, true, "横");
+        public Param<int> height = new Param<int>(1, 60, 1, true, "縦");
+
+        public Param<Sort> mode = new Param<Sort>(Sort.Normal, "インデックスの順番");
+        public Param<int> setting = new Param<int>(0, 60, 0, true, "設定値");
+
+        public enum Sort
+        {
+            Normal, //左上基準から右、端まで来たら一段下
+            CenterClockWise, //中央から時計回り
+            CenterCounterClockWise, //中央から半時計回り
+            CenterSpread, //中央から広がるように
+            Random, //ランダム
+
+        }
+    }
+
     #region 基本効果
 
     public class EFPosition : AviutlEffect

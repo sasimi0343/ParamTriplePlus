@@ -13,8 +13,9 @@ namespace ParamTriplePlus
 {
     public partial class PortableDialog : Form
     {
-        public PortableDialog(SimpleParam[] simpleparams)
+        public PortableDialog(SimpleParam[] simpleparams, MainWindow mainwindow = null)
         {
+            this.mainwindow = mainwindow;
             InitializeComponent();
 
             this.simpleparams = simpleparams;
@@ -44,7 +45,7 @@ namespace ParamTriplePlus
 
                         floatnum.Minimum = int.MinValue;
                         floatnum.Maximum = int.MaxValue;
-                        floatnum.Value = (decimal)item.value;
+                        floatnum.Value = Convert.ToDecimal(item.value);
                         floatnum.DecimalPlaces = 2;
 
                         paramHold.Add(item, (float)floatnum.Value);
@@ -64,16 +65,78 @@ namespace ParamTriplePlus
                         intnum.ValueChanged += (a, b) => { paramHold[item] = (int)intnum.Value; };
                         break;
                     case ParamType.String:
+                        var str = new TextBox();
+                        control = str;
+
+                        str.Text = (string)item.value;
+                        str.Multiline = false;
+
+                        paramHold.Add(item, str.Text);
+
+                        str.TextChanged += (a, b) => { paramHold[item] = str.Text; };
                         break;
                     case ParamType.File:
+                        var fileText = new PathTrackBar(mainwindow);
+                        control = fileText;
+
+                        fileText.PathText = (string)item.value;
+                        fileText.IsFolder = false;
+
+                        paramHold.Add(item, fileText.PathText);
+
+                        fileText.OnValueChanged += (a) =>
+                        {
+                            paramHold[item] = fileText.PathText;
+                        };
                         break;
                     case ParamType.Folder:
+                        var folderText = new PathTrackBar(mainwindow);
+                        control = folderText;
+
+                        folderText.PathText = (string)item.value;
+                        folderText.IsFolder = true;
+
+                        paramHold.Add(item, folderText.PathText);
+
+                        folderText.OnValueChanged += (a) =>
+                        {
+                            paramHold[item] = folderText.PathText;
+                        };
                         break;
                     case ParamType.MultiLine:
+                        var strm = new TextBox();
+                        control = strm;
+                        control.Height = 48;
+                        strm.Text = (string)item.value;
+                        strm.Multiline = true;
+
+                        paramHold.Add(item, strm.Text);
+
+                        strm.TextChanged += (a, b) => { paramHold[item] = strm.Text; };
                         break;
                     case ParamType.Font:
+                        var fontText = new FontTrackBar();
+                        control = fontText;
+                        fontText.FontName = (string)item.value;
+
+                        paramHold.Add(item, fontText.FontName);
+
+                        fontText.OnValueChanged += (a) =>
+                        {
+                            paramHold[item] = fontText.FontName;
+                        };
                         break;
                     case ParamType.Color:
+                        var colorTrack = new ColorTrackBar();
+                        control = colorTrack;
+                        colorTrack.selectedColor = (Params.Color)item.value;
+
+                        paramHold.Add(item, colorTrack.selectedColor);
+
+                        colorTrack.OnColorChanged += (a) =>
+                        {
+                            paramHold[item] = colorTrack.selectedColor;
+                        };
                         break;
                     case ParamType.Point:
                         break;
@@ -84,6 +147,18 @@ namespace ParamTriplePlus
                     case ParamType.Boolean:
                         break;
                     case ParamType.Text:
+                        var textText = new TextDecoratorTrackBar();
+                        control = textText;
+                        textText.TextValue = (string)item.value;
+
+                        paramHold.Add(item, textText.TextValue);
+
+                        textText.OnTextValueChanged += (a) =>
+                        {
+                            paramHold[item] = a;
+                        };
+
+                        textText.Height = 128;
                         break;
                     case ParamType.Vector2:
                         break;
@@ -114,6 +189,7 @@ namespace ParamTriplePlus
             DialogResult = DialogResult.Cancel;
         }
 
+        private MainWindow mainwindow;
         private Dictionary<SimpleParam, object> paramHold = new Dictionary<SimpleParam, object>();
         public SimpleParam[] simpleparams;
 

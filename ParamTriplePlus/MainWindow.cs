@@ -1,6 +1,8 @@
 using ParamTriplePlus.CustomComponent;
+using ParamTriplePlus.ExoGenerator;
 using ParamTriplePlus.Params;
 using ParamTriplePlus.Params.AviUtl;
+using ParamTriplePlus.Params.CharacterBone;
 using ParamTriplePlus.Params.ExtremeTransition;
 using ParamTriplePlus.Params.MoreShapes3D;
 using ParamTriplePlus.Params.NotAviUtl;
@@ -38,6 +40,7 @@ namespace ParamTriplePlus
             var task = Task.Run(() =>
             {
                 AviUtlLuaFile.LoadFolder(AviUtlPath);
+                ExoSettings.LoadExoSettings();
                 /*foreach (var item in AviUtlLuaFile.files)
                 {
                     if (IsDisposed) return;
@@ -131,6 +134,7 @@ namespace ParamTriplePlus
             AddEffectTree(typeof(EFRaster), blur);
             AddEffectTree(typeof(EFPolarCoordinateTransform), blur);
             AddEffectTree(typeof(EFDisplacementMap), blur);
+            AddEffectTree(typeof(EFLoopImage));
             AddEffectTree(typeof(EFScript));
             blur = AddEffectTree("Šî–{Œø‰Ê");
             AddEffectTree(typeof(EFPosition), blur);
@@ -138,6 +142,9 @@ namespace ParamTriplePlus
             AddEffectTree(typeof(EFZoom), blur);
             AddEffectTree(typeof(EFAlpha), blur);
             AddEffectTree(typeof(EFExtend), blur);
+            AddEffectTree(blur);
+            AddEffectTree(typeof(EFSaveImage), blur);
+            AddEffectTree(typeof(EFLoadImage), blur);
 
 
             blur = AddEffectTree("ExtremeTransition");
@@ -481,6 +488,7 @@ namespace ParamTriplePlus
                     intnum.Minimum = intparam.minimum;
                     intnum.Maximum = intparam.maximum;
                     intnum.Value = intparam.Value.sections[index].value;
+                    intnum.IsInt = true;
                     intnum.NumRangeOut = intparam.AllowOver;
                     if (isnew) intnum.OnValueChanged += (a) =>
                     {
@@ -712,6 +720,7 @@ namespace ParamTriplePlus
                     var intnum = new CustomizedTrackBar();
                     intnum.Minimum = intparam.minimum;
                     intnum.Maximum = intparam.maximum;
+                    intnum.IsInt = true;
                     intnum.Value = intparam.Value.initialValue;
                     intnum.NumRangeOut = intparam.AllowOver;
                     intnum.OnValueChanged += (a) =>
@@ -1179,6 +1188,21 @@ namespace ParamTriplePlus
         private void Help_Version_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void characterBoneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddObject(new Character());
+        }
+
+        private void ExoGenSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new ExoSettingDialog(this).ShowDialog();
+        }
+
+        private void ShowExoGeneratorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            new ExoGenerator.ExoGenerator(this).ShowDialog();
         }
     }
 }
