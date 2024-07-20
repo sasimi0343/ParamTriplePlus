@@ -1,5 +1,5 @@
 @[PTP] Test
---dialog:FilePath,file="";
+--dialog:FilePath,file="";Data,dd_data="";
 --check0:DontCheckRunning
 
 if (rikky_module == nil) then
@@ -8,6 +8,7 @@ end
 
 if (paramtripleplus == nil) then
 paramtripleplus = {}
+paramtripleplus_config = {}
 end
 
 local frame = rikky_module.getinfo("frame")
@@ -61,15 +62,24 @@ if (checkrunning and rikky_module.getinfo("focus")) then
 		end
 	end
 	
-	if (executable) then os.execute("start \"PTP\" " .. obj.getinfo("script_path") .. "PTP\\ParamTriplePlus.exe \"" .. fullpath .. "\"") end
+	local fh, err = io.open(fullpath)
+	local p = fullpath
+	if (not (err == nil)) then
+		p = file
+	end
+	
+	if (executable) then os.execute("start \"PTP\" " .. obj.getinfo("script_path") .. "PTP\\ParamTriplePlus.exe \"" .. p .. "\"") end
 	
 end
 
 if (obj.frame == 0 or checkrunning or (not paramtripleplus[this] == nil)) then
-	local ptp = {}
 	local fh, err = io.open(fullpath)
+	if (not (err == nil)) then
+		fh, err = io.open(file)
+	end
 	local str = rikky_module.convert(rikky_module.convert(fh:read("*a"), "shift-jis"), "utf8")
-	function toobj(st)
+	fh:close()
+	--[[function toobj(st)
 		if ((string.sub(st, 1, 1) == "\"") and (string.sub(st, -1, -1) == "\"")) then
 			return string.sub(st, 2, -2)
 		end
@@ -168,7 +178,9 @@ if (obj.frame == 0 or checkrunning or (not paramtripleplus[this] == nil)) then
 		end
 		
 		return kansei
-	end
+	end]]
+	
+	local jsonloader = require("jsonloader")
 	
 	function printTable(tab, indent)
 		if (indent == nil) then indent = 0 end
@@ -187,13 +199,36 @@ if (obj.frame == 0 or checkrunning or (not paramtripleplus[this] == nil)) then
 		return tostring(tab)
 	end
 	
-	print("===========================")
-	print(printTable(toobj(str)))
+	--print("===========================")
+	--print(printTable(jsonloader.toobj(str)))
 	
-	paramtripleplus[this] = toobj(str)
+	paramtripleplus[this] = jsonloader.toobj(str)
+	
 end
 
-local et = require("et")
+
+if ((obj.frame == 0 or checkrunning) and (not (dd_data == ""))) then
+	local ptp_config = {}
+	local fh, err = io.open(dd_data)
+	if (not (err == nil)) then
+		local path = rikky_module.getinfo("aup")
+		if (path == "") then
+			path = rikky_module.getinfo("path")
+		else
+			path = string.sub(path, 1, -#(rikky_module.getinfo("aup", 1))-5)
+		end
+		fh, err = io.open(path .. "conptcache\\" .. dd_data)
+		print(err)
+	end
+	local str = rikky_module.convert(rikky_module.convert(fh:read("*a"), "shift-jis"), "utf8")
+	fh:close()
+	--local str = fh:read("*a")
+	local jsonloader = require("jsonloader")
+	paramtripleplus_config[this] = jsonloader.toobj(str)
+	dd_data = ""
+end
+
+local et = require("et_ptp")
 
 function GetEaseValue(trt, frame, prevframe, last, prev, lastframe, params)
 	if (frame == nil) then
@@ -215,7 +250,21 @@ function BoolToNumber(bool)
 	if (bool) then return 1 else return 0 end
 end
 
+function VectorScale(vec, scale)
+	return {x = vec.x * scale.x, y = vec.y * scale.y, z = vec.z * scale.z}
+	--vec.x = vec.x * scale.x
+	--vec.y = vec.y * scale.y
+	--vec.z = vec.z * scale.z
+end
+
 function GetValue(v, name)
+	if (v[name] == nil) then
+		return nil
+	end
+	if ((not (v[name]["NativeValue"] == nil)) and (not (v[name]["NativeValue"] == ""))) then
+		return GetValue(paramtripleplus_config[this], v[name]["NativeValue"])
+	end
+	
 	local last = nil
 	local prev = nil
 	local prevframe = 0
@@ -267,75 +316,174 @@ return "円"
 end
 
 local ptp_effects = require("effects")
+local ptp_objects = {}
 
-function effect(type, v, effect)
+function loadAdditionalEffects(name)
+	local effs = require(name)
+	for k,v in pairs(effs) do
+		ptp_effects[k] = v
+	end
+end
+
+function loadAdditionalObjects(name)
+	local objs = require(name)
+	for k,v in pairs(objs) do
+		ptp_objects[k] = v
+	end
+end
+
+loadAdditionalObjects("ms3d")
+loadAdditionalEffects("notaviutl_effects")
+
+function effect(type, v, effect, ob)
 	local ef = ptp_effects[type]
 	if (ef == nil) then
 		return
 	end
-	ef(v, effect)
+	ef(v, effect, ob)
+end
+
+function object_additional(type, v)
+	local ob = ptp_objects[type]
+	if (ob == nil) then
+		return
+	end
+	ob(v)
+end
+
+function addEachObj(v, index, parent)
+	local bufname = "ptp_eachobj_" .. parent .. "_" .. index
+	rikky_module.image("w", bufname)
+	local ob = {
+		ox = 0,
+		oy = 0,
+		oz = 0,
+		rx = 0,
+		ry = 0,
+		rz = 0,
+		alpha = 1,
+		aspect = 0,
+		zoom = 1,
+		cx = obj.cx,
+		cy = obj.cy,
+		cz = obj.cz,
+		w = obj.w,
+		h = obj.h,
+		index = index,
+		name = bufname
+	}
+	table.insert(v.each, ob)
+	
+	return ob
 end
 
 function loadString(type, v, parent)
 if (parent == nil) then
 	parent = ""
 end
+v.each = {}
 if (type == "ParamTriplePlus.Params.AviUtl.FigureObject") then
-	obj.load("figure", numberToFigure(GetValue(v, "figure")), 0xffffff, GetValue(v, "size"), GetValue(v, "border"))
+	obj.load("figure", numberToFigure(GetValue(v, "figure")), ColorToNumber(GetValue(v, "color")), GetValue(v, "size"), GetValue(v, "border"))
+	addEachObj(v, 0, parent)
 elseif (type == "ParamTriplePlus.Params.AviUtl.TextObject") then
-	obj.setfont(GetValue(v, "font"), GetValue(v, "size"), 0, 0xffffff)
-	obj.load("text", GetValue(v, "text"))
+	obj.setfont(GetValue(v, "font"), GetValue(v, "size"), 0, ColorToNumber(GetValue(v, "color")))
+	local text = GetValue(v, "text")
+	if (GetValue(v, "eachobject")) then
+		local w,h,maxh,maxw = 0,0,0,0
+		local index = 1
+		for i=1,#text do
+			local char = string.sub(text, index, index)
+			
+			if (char == "\n") then
+				w = 0
+				h = maxh
+				maxh = 0
+			else
+				obj.load("text", char) --v.eachを入れれば強制的に個別オブジェクトにできるよ！！！！！！！
+				local ob = addEachObj(v, index, parent)
+				ob.ox = w
+				ob.oy = h
+				w = w + obj.w
+				maxw = math.max(maxw, w + obj.w)
+				maxh = math.max(maxh, h + obj.h)
+			end
+			
+			index = index + 1
+		end
+		
+		for k,v2 in pairs(v.each) do
+			v2.ox = v2.ox - (maxw / 2)
+			v2.oy = v2.oy - (maxh / 2)
+		end
+	else
+		obj.load("text", text)
+		addEachObj(v, 0, parent)
+	end
 elseif (type == "ParamTriplePlus.Params.AviUtl.ImageObject") then
 	obj.load("image", GetValue(v, "image"))
+	addEachObj(v, 0, parent)
 elseif (type == "ParamTriplePlus.Params.AviUtl.VideoObject") then
 	obj.load("movie", GetValue(v, "video"), (GetValue(v, "frame") + (obj.frame * (GetValue(v, "speed") / 100))) / obj.framerate)
+	addEachObj(v, 0, parent)
 elseif (type == "ParamTriplePlus.Params.AviUtl.FrameBufferObject") then
 	obj.load("framebuffer")
+	addEachObj(v, 0, parent)
 elseif (type == "ParamTriplePlus.Params.AviUtl.GroupObject") then
 	local i = 0
 	local min_x, min_y, max_x, max_y = 0, 0, 0, 0
 	for k,v2 in pairs(v.children) do
 		loadString(v2["_type"], v2, parent .. "group_")
 		
-		for _,v3 in pairs(v2.effects) do
-			effect(v3["_type"], v2, v3)
+		for _,v4 in pairs(v2.each) do
+			rikky_module.image("r", v4.name)
+			for _,v3 in pairs(v2.effects) do
+				
+				effect(v3["_type"], v2, v3, v4)
+				v4.w = obj.w
+				v4.h = obj.h
+			end
+			
+			rikky_module.image("w", "ptp_group_" .. parent .. i)
+			
+			local zoom = GetValue(v2, "zoom") * v4.zoom / 100
+			local w,h,rz = obj.w * zoom,obj.h * zoom,GetValue(v2, "rotation").z + v4.rz
+			local pos = GetValue(v2, "position")
+			pos.x = pos.x + v4.ox
+			pos.y = pos.y + v4.oy
+			pos.z = pos.z + v4.oz
+			
+			local length = math.sqrt(math.pow(w / 2, 2) + math.pow(h / 2, 2))
+			local baseangle = math.atan2(h/2, w/2)
+			local baseangle_anti = (math.pi - baseangle)
+			
+			local p1x = math.cos(math.rad(-rz) + baseangle) * length
+			local p1y = math.sin(math.rad(-rz) + baseangle) * length
+			local p2x = math.cos(math.rad(-rz) - baseangle) * length
+			local p2y = math.sin(math.rad(-rz) - baseangle) * length
+			local p3x = math.cos(math.rad(-rz) + baseangle_anti) * length
+			local p3y = math.sin(math.rad(-rz) + baseangle_anti) * length
+			local p4x = math.cos(math.rad(-rz) - baseangle_anti) * length
+			local p4y = math.sin(math.rad(-rz) - baseangle_anti) * length
+			
+			local imaxx = math.max(p1x, p2x, p3x, p4x)
+			local iminx = math.min(p1x, p2x, p3x, p4x)
+			local imaxy = math.max(p1y, p2y, p3y, p4y)
+			local iminy = math.min(p1y, p2y, p3y, p4y)
+			
+			local maxx = pos.x + (imaxx)
+			local minx = pos.x + (iminx)
+			local maxy = pos.y + (imaxy)
+			local miny = pos.y + (iminy)
+			
+			if (maxx > max_x) then max_x = maxx end
+			if (minx < min_x) then min_x = minx end
+			if (maxy > max_y) then max_y = maxy end
+			if (miny < min_y) then min_y= miny end
+			
+			i = i + 1
 		end
 		
-		rikky_module.image("w", "ptp_group_" .. parent .. i)
-		
-		local zoom = GetValue(v2, "zoom") / 100
-		local w,h,rz = obj.w * zoom,obj.h * zoom,GetValue(v2, "rotation").z
-		local pos = GetValue(v2, "position")
-		
-		local length = math.sqrt(math.pow(w / 2, 2) + math.pow(h / 2, 2))
-		local baseangle = math.atan2(h/2, w/2)
-		local baseangle_anti = (math.pi - baseangle)
-		
-		local p1x = math.cos(math.rad(-rz) + baseangle) * length
-		local p1y = math.sin(math.rad(-rz) + baseangle) * length
-		local p2x = math.cos(math.rad(-rz) - baseangle) * length
-		local p2y = math.sin(math.rad(-rz) - baseangle) * length
-		local p3x = math.cos(math.rad(-rz) + baseangle_anti) * length
-		local p3y = math.sin(math.rad(-rz) + baseangle_anti) * length
-		local p4x = math.cos(math.rad(-rz) - baseangle_anti) * length
-		local p4y = math.sin(math.rad(-rz) - baseangle_anti) * length
-		
-		local imaxx = math.max(p1x, p2x, p3x, p4x)
-		local iminx = math.min(p1x, p2x, p3x, p4x)
-		local imaxy = math.max(p1y, p2y, p3y, p4y)
-		local iminy = math.min(p1y, p2y, p3y, p4y)
-		
-		local maxx = pos.x + (imaxx)
-		local minx = pos.x + (iminx)
-		local maxy = pos.y + (imaxy)
-		local miny = pos.y + (iminy)
-		
-		if (maxx > max_x) then max_x = maxx end
-		if (minx < min_x) then min_x = minx end
-		if (maxy > max_y) then max_y = maxy end
-		if (miny < min_y) then min_y= miny end
-		
-		i = i + 1
+
 	end
 	
 	local w = math.max(max_x, -min_x) * 2
@@ -344,37 +492,126 @@ elseif (type == "ParamTriplePlus.Params.AviUtl.GroupObject") then
 	obj.setoption("drawtarget", "tempbuffer", w, h)
 	i = 0
 	for k,v2 in pairs(v.children) do
-		rikky_module.image("r", "ptp_group_" .. parent .. i)
-		
-		local pos = GetValue(v2, "position")
-		local rot = GetValue(v2, "rotation")
-		local zoom = GetValue(v2, "zoom") / 100
-		local alpha = GetValue(v2, "alpha") / 100
-		
-		obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
-		rikky_module.image("c", "ptp_group_" .. parent .. i)
-		i = i + 1
+		for _,v4 in pairs(v2.each) do
+			rikky_module.image("r", "ptp_group_" .. parent .. i)
+			
+			local pos = GetValue(v2, "position")
+			pos = {x = pos.x + v4.ox, y = pos.y + v4.oy, z = pos.z + v4.oz}
+			local rot = GetValue(v2, "rotation")
+			rot = {x = rot.x + v4.rx, y = rot.y + v4.ry, z = rot.z + v4.rz}
+			local zoom = GetValue(v2, "zoom") * v4.zoom / 100
+			local alpha = GetValue(v2, "alpha") * v4.alpha / 100
+			
+			obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
+			rikky_module.image("c", "ptp_group_" .. parent .. i)
+			i = i + 1
+		end
 	end
 	
 	obj.load("tempbuffer")
+	addEachObj(v, 0, parent)
+else
+	object_additional(type, v)
 end
 end
 
 
 local ptp = paramtripleplus[this]
 
+local l = 0
+
 for k,v in pairs(ptp) do
 	--print(v["_type"])
-	loadString(v["_type"], v)
-	
-	for _,v2 in pairs(v.effects) do
-		effect(v2["_type"], v, v2)
+	l = l + 1
+	v.each = {}
+	loadString(v["_type"], v, l)
+	if (v.is3d) then
+		for _,v2 in pairs(geos) do
+			for _,v3 in pairs(v2.surface) do
+				local scale = GetValue(v, "scale")
+				v3[1] = VectorScale(v3[1], scale)
+				v3[2] = VectorScale(v3[2], scale)
+				v3[3] = VectorScale(v3[3], scale)
+				v3[4] = VectorScale(v3[4], scale)
+			end
+			
+		end
+	else
+		for _,v4 in pairs(v.each) do
+			rikky_module.image("r", v4.name)
+			for _,v2 in pairs(v.effects) do
+				effect(v2["_type"], v, v2, v4)
+				v4.w = obj.w
+				v4.h = obj.h
+			end
+			
+			local pos = GetValue(v, "position")
+				pos = {x = pos.x + v4.ox, y = pos.y + v4.oy, z = pos.z + v4.oz}
+			local rot = GetValue(v, "rotation")
+				rot = {x = rot.x + v4.rx, y = rot.y + v4.ry, z = rot.z + v4.rz}
+			local zoom = GetValue(v, "zoom") * v4.zoom / 100
+			local alpha = GetValue(v, "alpha") * v4.alpha / 100
+			
+			obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
+		end
 	end
-	
-	local pos = GetValue(v, "position")
-	local rot = GetValue(v, "rotation")
-	local zoom = GetValue(v, "zoom") / 100
-	local alpha = GetValue(v, "alpha") / 100
-	
-	obj.draw(pos.x, pos.y, pos.z, zoom, alpha, rot.x, rot.y, rot.z)
 end
+
+@[PTP] GlyphTest
+--track0:Scale,0,999,100,0.1
+--file:
+
+require("rikky_module")
+local jsonloader = require("jsonloader")
+
+local fh, err = io.open(file)
+local str = rikky_module.convert(rikky_module.convert(fh:read("*a"), "shift-jis"), "utf8")
+
+local ob = jsonloader.toobj(str)
+
+obj.load("figure", "四角形", 0xffffff, 1)
+obj.setoption("antialias", 0)
+
+local scale = obj.track0 / 100
+
+function draw(array)
+	local points = {}
+	local dx,dy = 0, 0
+	for k,v in pairs(array) do
+		if (not (v["array"] == nil)) then
+			draw(v.array)
+		else
+			dx = dx + v.x
+			dy = dy + v.y
+			table.insert(points, v)
+		end
+	end
+	if (#points == 0) then
+		return
+	end
+	dx = dx / #points
+	dy = dy / #points
+	local prev1 = nil
+	obj.setoption("drawtarget", "tempbuffer", 200 * scale, 200 * scale)
+	for k,v in pairs(points) do
+		if (not (prev1 == nil)) then
+			obj.drawpoly(
+			(dx - 100) * scale, (dy - 100) * scale, 0,
+			(prev1.x - 100) * scale, (prev1.y - 100) * scale, 0,
+			(v.x - 100) * scale, (v.y - 100) * scale, 0,
+			(v.x - 100) * scale, (v.y - 100) * scale, 0)
+		end
+		prev1 = v
+	end
+	obj.drawpoly(
+		(dx - 100) * scale, (dy - 100) * scale, 0,
+		(prev1.x - 100) * scale, (prev1.y - 100) * scale, 0,
+		(points[1].x - 100) * scale, (points[1].y - 100) * scale, 0,
+		(points[1].x - 100) * scale, (points[1].y - 100) * scale, 0)
+	obj.setoption("drawtarget", "framebuffer")
+	obj.load("tempbuffer")
+	obj.draw()
+	obj.load("figure", "四角形", 0xffffff, 1)
+end
+
+draw(ob.array)

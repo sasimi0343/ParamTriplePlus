@@ -151,4 +151,48 @@ end,
 	"å≥ÇÃÉTÉCÉYÇ…çáÇÌÇπÇÈ", BoolToNumber(GetValue(ef, "adjustSize")),
 	"type", GetValue(ef, "figure"),
 	"mode", GetValue(ef, "mode")) end,
+	
+[a .. "Script"] = function(v, ef, ob)
+	local scr = GetValue(ef, "script")
+	local loaded = false
+	local func = load(function()
+		if (loaded) then return nil end
+		return scr
+	end)
+	func()
+	end,
+	
+[a .. "Position"] = function(v, ef, ob)
+	local pos = GetValue(ef, "pos")
+	ob.ox = ob.ox + pos.x
+	ob.oy = ob.oy + pos.y
+	ob.oz = ob.oy + pos.z
+	end,
+[a .. "Rotation"] = function(v, ef, ob)
+	local rot = GetValue(ef, "rotation")
+	ob.rx = ob.rx + rot.x
+	ob.ry = ob.ry + rot.y
+	ob.rz = ob.rz + rot.z
+	end,
+[a .. "Zoom"] = function(v, ef, ob)
+	local zoom = GetValue(ef, "zoom")
+	if (GetValue(ef, "x") == GetValue(ef, "y")) then
+		ob.zoom = ob.zoom * zoom
+		return
+	end
+	local aspect = ob.aspect -- -0.5 Å© X:100, Y:200 Å® 0
+	local zx = (GetValue(ef, "x")/100) * (math.max(math.min(1-aspect, 1), 0) * ob.zoom)
+	local zy = (GetValue(ef, "y")/100) * (math.max(math.min(aspect+1, 1), 0) * ob.zoom)
+	ob.zoom = math.max(zx, zy) * zoom * ob.zoom
+	if ((zx + zy) == 0) then
+		return
+	end
+	
+	local asp = ((zy - zx)/(zx + zy))
+	ob.aspect = asp
+	end,
+	
+[a .. "Alpha"] = function(v, ef, ob)
+	ob.alpha = ob.alpha * (GetValue(ef, "alpha")/100)
+	end,
 }

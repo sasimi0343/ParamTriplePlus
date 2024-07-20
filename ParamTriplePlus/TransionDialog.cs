@@ -52,7 +52,7 @@ namespace ParamTriplePlus
                 transionlist.GetType().GetMethod("Add").Invoke(transionlist, new object[] { item });
                 var parambar = new SimpleParamBar();
                 parambar.trackBar1.Maximum = length;
-                parambar.trackBar1.Value = ParamList.GetField<int>(item, "frame");
+                parambar.trackBar1.Value = Math.Min(ParamList.GetField<int>(item, "frame"), length);
                 parambar.OnFrameChanged += (a) => { ParamList.SetField(list[parambar.index], "frame", a); UpdateOnly(); };
                 parambar.OnDeleted += () => { RemoveSection(parambar.index); };
                 parambar.Parent = listpanel;

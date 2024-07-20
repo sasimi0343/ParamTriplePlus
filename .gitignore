@@ -1,5 +1,5 @@
 ParamTriplePlus/bin/
 ParamTriplePlusScript/PTP/
 .vs/
-.exo
-.aulptp
+*.exo
+*.aulptp

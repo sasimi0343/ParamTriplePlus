@@ -34,6 +34,7 @@
             length = new CustomizedTrackBar();
             comboBox1 = new ComboBox();
             editExoButton = new Button();
+            pathTrackBar1 = new PathTrackBar();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -47,6 +48,7 @@
             dragButton.Text = "ここをドラッグ&&ドロップして\r\nExoファイルを作成";
             dragButton.UseVisualStyleBackColor = true;
             dragButton.Click += dragButton_Click;
+            dragButton.MouseDown += dragButton_MouseDown;
             dragButton.MouseMove += dragButton_MouseMove;
             // 
             // panel1
@@ -58,7 +60,7 @@
             panel1.Controls.Add(length);
             panel1.Location = new Point(3, 5);
             panel1.Name = "panel1";
-            panel1.Size = new Size(794, 394);
+            panel1.Size = new Size(794, 367);
             panel1.TabIndex = 1;
             // 
             // label1
@@ -105,11 +107,21 @@
             editExoButton.Text = "編集";
             editExoButton.UseVisualStyleBackColor = true;
             // 
+            // pathTrackBar1
+            // 
+            pathTrackBar1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            pathTrackBar1.Location = new Point(12, 378);
+            pathTrackBar1.Name = "pathTrackBar1";
+            pathTrackBar1.PathText = "";
+            pathTrackBar1.Size = new Size(475, 31);
+            pathTrackBar1.TabIndex = 4;
+            // 
             // ExoGenerator
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(pathTrackBar1);
             Controls.Add(editExoButton);
             Controls.Add(comboBox1);
             Controls.Add(panel1);
@@ -129,5 +141,6 @@
         private Button editExoButton;
         private CustomizedTrackBar length;
         private Label label1;
+        private PathTrackBar pathTrackBar1;
     }
 }

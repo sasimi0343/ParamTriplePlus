@@ -18,6 +18,8 @@ namespace ParamTriplePlus.ExoGenerator
         {
             mainwindow = mainWindow;
             InitializeComponent();
+            pathTrackBar1.IsFolder = true;
+            pathTrackBar1.SetMainWindow(mainWindow);
             foreach (var item in ExoSettings.files)
             {
                 comboBox1.Items.Add(item.SettingName);
@@ -77,21 +79,29 @@ namespace ParamTriplePlus.ExoGenerator
 
         private DataObject exodata;
 
-        private void dragButton_Click(object sender, EventArgs e)
+        private void StartDandD()
         {
-            if (!Directory.Exists("./conptpcache"))
+            var conptPath = pathTrackBar1.PathText;
+            var conptFolder = !string.IsNullOrEmpty(conptPath) ? conptPath + "/conptcache" : "./conptpcache";
+            if (!Directory.Exists(conptFolder))
             {
-                Directory.CreateDirectory("./conptpcache");
+                Directory.CreateDirectory(conptFolder);
             }
             var sjis = Encoding.GetEncoding("shift-jis");
             var set = ExoSettings.files[comboBox1.SelectedIndex];
-            var dataFile = "./" + DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_ff") + ".conptp";
-            var exo = "[exedit]\r\nwidth=1920\r\nheight=1080\r\nrate=30\r\nscale=1\r\nlength=" + (int)length.Value + "\r\naudio_rate=44100\r\naudio_ch=2\r\n[0]\r\nstart=1\r\nend=" + (int)length.Value + "\r\nlayer=1\r\noverlay=1\r\ncamera=0\r\n[0.0]\r\n_name=カスタムオブジェクト\r\ntrack0=0.00\r\ntrack1=0.00\r\ntrack2=0.00\r\ntrack3=0.00\r\ncheck0=1\r\ntype=0\r\nfilter=0\r\nname=[PTP] Test@ParamTriplePlus\r\nparam=file=\"" + set.PTPPath.Replace("\\", "\\\\") + "\";dd_data=\"" + Path.GetFullPath(dataFile).Replace("\\", "\\\\") + "\";\r\n[0.1]\r\n_name=標準描画\r\nX=0.0\r\nY=0.0\r\nZ=0.0\r\n拡大率=100.00\r\n透明度=0.0\r\n回転=0.00\r\nblend=0";
+            var dataFileName = DateTime.Now.ToString("yyyy_MM_dd_HH_mm_ss_ff") + ".conptp";
+            var dataFile = conptFolder + "/" + dataFileName;
+            var exo = "[exedit]\r\nwidth=1920\r\nheight=1080\r\nrate=30\r\nscale=1\r\nlength=" + (int)length.Value + "\r\naudio_rate=44100\r\naudio_ch=2\r\n[0]\r\nstart=1\r\nend=" + (int)length.Value + "\r\nlayer=1\r\noverlay=1\r\ncamera=0\r\n[0.0]\r\n_name=カスタムオブジェクト\r\ntrack0=0.00\r\ntrack1=0.00\r\ntrack2=0.00\r\ntrack3=0.00\r\ncheck0=1\r\ntype=0\r\nfilter=0\r\nname=[PTP] Test@ParamTriplePlus\r\nparam=file=\"" + set.PTPPath.Replace("\\", "\\\\") + "\";dd_data=\"" + (string.IsNullOrEmpty(conptPath) ? Path.GetFullPath(dataFile).Replace("\\", "\\\\") : dataFileName.Replace("\\", "\\\\")) + "\";\r\n[0.1]\r\n_name=標準描画\r\nX=0.0\r\nY=0.0\r\nZ=0.0\r\n拡大率=100.00\r\n透明度=0.0\r\n回転=0.00\r\nblend=0";
             File.WriteAllText("./cache.exo", exo, Encoding.GetEncoding("shift-jis"));
-            File.WriteAllText(dataFile, PTPJsonSerializer.ToJson(paramList).Replace("\\", "\\\\").Replace("\"", "\\\""), sjis);
+            File.WriteAllText(dataFile, PTPJsonSerializer.ToJson(paramList));
             exodata = new DataObject();
             exodata.SetFileDropList([Path.GetFullPath("./cache.exo")]);
             DoDragDrop(exodata, DragDropEffects.Copy);
+        }
+
+        private void dragButton_Click(object sender, EventArgs e)
+        {
+            StartDandD();
         }
 
         private void dragButton_QueryContinueDrag(object sender, QueryContinueDragEventArgs e)
@@ -115,6 +125,11 @@ namespace ParamTriplePlus.ExoGenerator
             {
                 DoDragDrop(exodata, DragDropEffects.Copy);
             }
+        }
+
+        private void dragButton_MouseDown(object sender, MouseEventArgs e)
+        {
+            StartDandD();
         }
     }
 }
